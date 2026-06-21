@@ -1,6 +1,7 @@
 <!DOCTYPE html><html lang="de"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow">
-<title>Semester 1 · Klausurtrainer · Charité MSM</title>
+<title>Kreuzzug · Klausurtrainer · Semester 1</title>
+<script>try{if(!localStorage.getItem('kz_pilger'))location.replace('index.html');}catch(e){}</script>
 <style>
 :root{--ink:#1f2430;--mut:#6b7280;--line:#e5e7eb;--bg:#f7f8fa}
 *{box-sizing:border-box} body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg);margin:0;line-height:1.5;font-size:15px}
@@ -37,6 +38,9 @@ h1{font-size:23px;margin:2px 0 3px} .sub{color:var(--mut);font-size:13.5px;margi
 .abb{margin:8px 0} .abb img{max-width:340px;max-height:260px;border:1px solid var(--line);border-radius:8px;cursor:zoom-in;background:#fff;display:block}
 .abbcap{font-size:11px;color:var(--mut);margin-top:3px} .abbmiss{font-size:12px;color:#b45309;font-style:italic;margin:8px 0}
 #lb{position:fixed;inset:0;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;z-index:50;cursor:zoom-out} #lb img{max-width:94%;max-height:94%;border-radius:8px;background:#fff} body.lbopen{overflow:hidden}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:60;padding:16px} .modal.open{display:flex}
+.modal .box{background:#fff;border-radius:14px;padding:20px;max-width:480px;width:100%} .modal textarea{width:100%;min-height:120px;padding:10px;border:1px solid var(--line);border-radius:8px;font-size:14px;font-family:inherit;margin-top:8px}
+.modal input{width:100%;padding:9px;border:1px solid var(--line);border-radius:8px;font-size:14px;margin-top:8px} .modal .row{display:flex;gap:10px;margin-top:12px}
 /* Klausurmodus: Lösung verborgen bis Klick */
 body.mode-klausur .opt{cursor:pointer;border:1px solid transparent} body.mode-klausur .opt:hover{background:#eef2ff}
 body.mode-klausur .opt.correct{background:transparent;border-color:transparent} body.mode-klausur .opt.correct:hover{background:#eef2ff}
@@ -44,6 +48,16 @@ body.mode-klausur .chk{visibility:hidden} body.mode-klausur .answer{display:none
 body.mode-klausur .card.answered .opt{cursor:default} body.mode-klausur .card.answered .opt:hover{background:#fff}
 body.mode-klausur .card.answered .opt.correct{background:#e7f8ec;border-color:#b6e6c4} body.mode-klausur .card.answered .opt.correct:hover{background:#e7f8ec}
 body.mode-klausur .card.answered .opt.chosen-wrong{background:#fde8e8;border-color:#f1b0b0} body.mode-klausur .card.answered .answer{display:block}
+.themebtn{float:right;cursor:pointer;color:var(--mut);border:1px solid var(--line);border-radius:20px;padding:2px 10px;font-size:12px}
+body.dark{--ink:#e6e8eb;--mut:#9aa3ad;--line:#2a313a;--bg:#0f1419}
+body.dark .tabs{background:rgba(15,20,25,.97)}
+body.dark .tab,body.dark .btn,body.dark .lz,body.dark .lzrow,body.dark .qcard,body.dark .setup,body.dark .help,body.dark .summary,body.dark .modal .box,body.dark .toolbar input,body.dark .modal textarea,body.dark .modal input{background:#171c22;color:var(--ink)}
+body.dark .tab.active,body.dark .btn.active{background:#374151;color:#fff}
+body.dark .nextbtn{background:#2563eb;color:#fff}
+body.dark.mode-klausur .opt:hover,body.dark.mode-klausur .opt.correct:hover{background:#1e2630}
+body.dark .opt.chosen-wrong,body.dark.mode-klausur .card.answered .opt.chosen-wrong{background:#3a1b1b;border-color:#6b2f2f}
+body.dark.mode-klausur .card.answered .opt.correct,body.dark.mode-klausur .card.answered .opt.correct:hover{background:#173a23;border-color:#2f6b41}
+body.dark .badge.freq{background:#3a2f12;color:#e7c66b}
 /* Lernziele-Liste */
 .lzrow{background:#fff;border:1px solid var(--line);border-left-width:4px;border-radius:10px;padding:10px 14px;margin:7px 0;cursor:pointer;display:flex;gap:10px;align-items:baseline} .lzrow:hover{border-color:#94a3b8}
 .lzrow .id{font-weight:700;font-size:12px;color:#334155;white-space:nowrap} .lzrow .tx{flex:1;font-size:13.5px} .lzrow .ct{font-size:12px;color:var(--mut);white-space:nowrap} .lzrow.empty{opacity:.55;cursor:default}
@@ -60,10 +74,12 @@ body.mode-klausur .card.answered .opt.chosen-wrong{background:#fde8e8;border-col
 .help{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin-top:14px;font-size:14.5px;line-height:1.6} .help h3{margin:14px 0 4px} .help a{color:#2563eb} .mailbtn{display:inline-block;background:#2563eb;color:#fff;border-radius:10px;padding:10px 16px;text-decoration:none;font-weight:600;margin-top:8px}
 .empty-msg{color:var(--mut);padding:24px 0}
 @media print{ .tabs,.nav-top,.toolbar,.cardacts,.qnav{display:none!important} .answer,.opts{display:block!important} .chk{visibility:visible!important} .opt.correct{background:#e7f8ec!important;-webkit-print-color-adjust:exact;print-color-adjust:exact} }
-</style></head><body class="mode-klausur"><div class="wrap">
-<div class="nav-top"><a href="index.html">← Alle Semester</a><a href="Abbildungen.html">🖼️ Abbildungen</a><a href="https://fsi-charite.de/fuer-studierende/infos-fuer-jedes-semester/" target="_blank" rel="noopener">Fachschaft ↗</a></div>
-<h1>Semester 1 · Klausurtrainer</h1>
-<div class="sub">Charité MSM · Module M02 + M03 + M04 · 1107 Fragen · 306 Lernziele mit Altfragen · 65 Abbildungen</div>
+</style></head><body class="mode-klausur">
+<script>try{if(localStorage.kz_theme==='dark'||(localStorage.kz_theme==null&&matchMedia('(prefers-color-scheme:dark)').matches))document.body.classList.add('dark');}catch(e){}</script>
+<div class="wrap">
+<div class="nav-top"><a href="start.html">← Alle Semester</a><a href="Abbildungen.html">🖼️ Abbildungen</a><span id="themebtn" class="themebtn">🌙 / ☀️</span></div>
+<h1>⚔️ Kreuzzug · Semester 1</h1>
+<div class="sub">Dein Feldzug gegen die Klausur · Module M02 + M03 + M04 · 1107 Übungsfragen · 306 Lernziele · 65 Abbildungen</div>
 <nav class="tabs">
  <button class="tab active" data-view="ueben">Üben</button>
  <button class="tab" data-view="quiz">Quiz</button>
@@ -73,10 +89,19 @@ body.mode-klausur .card.answered .opt.chosen-wrong{background:#fde8e8;border-col
 </nav>
 <main id="app"></main>
 </div><div id="lb"><img alt=""></div>
+<div id="fb" class="modal"><div class="box">
+ <h3 style="margin:0 0 4px">Feedback an den Entwickler</h3>
+ <div class="sub" id="fbctx"></div>
+ <textarea id="fbmsg" placeholder="Deine Nachricht (z.B. was an der Frage falsch, unklar oder nicht mehr relevant ist) …"></textarea>
+ <input id="fbmail" placeholder="Deine E-Mail (optional, nur für Rückfragen)">
+ <input type="text" id="fbhp" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px">
+ <div class="row"><button class="nextbtn" id="fbsend">Senden</button><button class="btn" id="fbcancel">Abbrechen</button></div>
+ <div class="sub" id="fbstatus" style="margin-top:8px"></div>
+</div></div>
 <script src="data/semester-1.js"></script>
 <script>
 (function(){
-var S=window.S1, Q=S.questions, LZ=S.lernziele, EMAIL="caspar-nikolaus-ralph.schumacher@charite.de";
+var S=window.S1, Q=S.questions, LZ=S.lernziele, NAME="Kreuzzug", W3F="bc25006f-8fbf-47ec-9df9-4aa6a82634be";
 var MODNAME=S.meta.modnames, MODCOL={M02:"#2563eb",M03:"#16a34a",M04:"#9333ea"};
 var MODS=["M02","M03","M04"];
 var app=document.getElementById('app'), markEl=document.getElementById('markcount');
@@ -270,38 +295,58 @@ function renderSummary(){
 }
 
 function renderHilfe(){
-  var h='<div class="help"><h3>So funktioniert der Klausurtrainer</h3>'
+  var h='<div class="help"><h3>So funktioniert '+esc(NAME)+'</h3>'
    +'<ul><li><b>Üben:</b> alle Fragen nach Modul → Modulwoche → Lernziel, mit Filtern und Suche.</li>'
    +'<li><b>Quiz:</b> Module/Modulwochen wählen, Anzahl (10/20/40/alle/eigene) → zufälliges Set, eine Frage nach der anderen, Auswertung am Ende.</li>'
    +'<li><b>Lernziele:</b> alle Lernziele je Modul/Modulwoche; Klick zeigt die zugehörigen Fragen.</li>'
    +'<li><b>★ Markiert:</b> schwierige Fragen mit „☆ markieren" sammeln (im Browser gespeichert) und gezielt wiederholen.</li>'
    +'<li><b>Klausurmodus:</b> Antwort anklicken → richtig/falsch + Lösung. <b>PDF:</b> im Browser Drucken → Als PDF sichern.</li></ul>'
-   +'<h3>Fehler gefunden? Frage veraltet / nicht (mehr) Teil des Moduls?</h3>'
-   +'<p>Melde es mir – ich korrigiere oder lösche die Frage. Am schnellsten direkt an einer Frage über „⚑ Fehler melden", oder hier:</p>'
-   +'<a class="mailbtn" id="genmail" href="#">✉ Fehler / Feedback per E-Mail</a>'
-   +'<p style="margin-top:10px;font-size:13px;color:var(--mut)">Kontakt: '+esc(EMAIL)+'<br>Stand der Daten: '+esc(S.meta.stand)+'. Ohne Gewähr auf Richtigkeit aller Lösungen.</p></div>';
+   +'<h3>Fehler gefunden oder Feedback?</h3>'
+   +'<p>Melde es dem Entwickler – z.B. wenn eine Frage falsch, unklar oder nicht (mehr) relevant ist. Direkt an einer Frage über „⚑ Fehler melden" oder hier:</p>'
+   +'<button class="mailbtn" id="genfb">✉ Feedback senden</button>'
+   +'<h3>Hinweis &amp; Haftungsausschluss</h3>'
+   +'<p class="sub">'+esc(NAME)+' ist ein inoffizielles, privates Lernprojekt. Die Fragen orientieren sich an den Lernzielen des Semesters und könnten so oder in ähnlicher Form in Klausuren vorkommen – es sind keine offiziellen Prüfungsfragen. Es besteht keine Verbindung zu einer Universität, Fakultät oder Fachschaft. Es wird keine Gewähr für Richtigkeit, Vollständigkeit oder Aktualität von Fragen und Lösungen übernommen. Nutzung auf eigene Verantwortung. Stand der Daten: '+esc(S.meta.stand)+'.</p></div>';
   app.innerHTML=h;
-  document.getElementById('genmail').addEventListener('click',function(e){e.preventDefault();
-    window.location.href='mailto:'+EMAIL+'?subject='+encodeURIComponent('Feedback Klausurtrainer Semester 1')+'&body='+encodeURIComponent('Hallo Caspar,\n\nmein Feedback zum Klausurtrainer:\n\n');});
+  document.getElementById('genfb').addEventListener('click',function(){openFeedback(null);});
 }
 
 // ---------- global handlers ----------
 function toggleMark(id,el){ if(marks.has(id)){marks.delete(id);} else {marks.add(id);} saveMarks(marks); updMarkCount();
   document.querySelectorAll('.card[data-id="'+CSS.escape(id)+'"] .act.mark').forEach(function(a){var on=marks.has(id);a.classList.toggle('on',on);a.textContent=on?'★ markiert':'☆ markieren';}); }
-function reportQuestion(id){ var q=qById[id]; var body='Frage-ID: '+id+'\nModul/MW/Lernziel: '+q.mod+' / '+q.mw+' / '+q.lz+'\nFrage: '+(q.q||'').slice(0,300)+'\nQuelle(n): '+q.src+'\n\nWas stimmt nicht? (z.B. falsche Loesung / veraltet / nicht Teil des Moduls):\n\n';
-  window.location.href='mailto:'+EMAIL+'?subject='+encodeURIComponent('Fehler-Meldung Klausurtrainer: Frage '+id)+'&body='+encodeURIComponent(body); }
+var fbCtx=null;
+function openFeedback(ctx){ fbCtx=ctx;
+  document.getElementById('fbctx').textContent = ctx? ('Bezug: Frage '+ctx.qid+(ctx.lz?(' · Lernziel '+ctx.lz):'')) : 'Allgemeines Feedback';
+  document.getElementById('fbmsg').value=''; document.getElementById('fbmail').value=''; document.getElementById('fbstatus').textContent=''; document.getElementById('fbhp').value='';
+  document.getElementById('fb').classList.add('open'); setTimeout(function(){document.getElementById('fbmsg').focus();},50); }
+function closeFeedback(){ document.getElementById('fb').classList.remove('open'); }
+function sendFeedback(){
+  var msg=document.getElementById('fbmsg').value.trim(), mail=document.getElementById('fbmail').value.trim(), st=document.getElementById('fbstatus');
+  if(document.getElementById('fbhp').value){ closeFeedback(); return; }
+  if(!msg){ st.textContent='Bitte eine Nachricht eingeben.'; return; }
+  if(W3F.indexOf('__')===0){ st.textContent='Feedback ist derzeit nicht konfiguriert.'; return; }
+  var c=fbCtx, full=(c?('Frage-ID: '+c.qid+'\nModul/MW/Lernziel: '+c.mod+' / '+c.mw+' / '+c.lz+'\nFrage: '+(c.q||'').slice(0,300)+'\nQuelle(n): '+(c.src||'')+'\n\n'):'')+'Nachricht:\n'+msg;
+  st.textContent='Senden …';
+  fetch('https://api.web3forms.com/submit',{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},
+    body:JSON.stringify({access_key:W3F, subject:NAME+' Feedback'+(c?(' – Frage '+c.qid):''), message:full, replyto:(mail||'noreply@example.com'), from_name:'Kreuzzug Web-App'})})
+   .then(function(r){return r.json();}).then(function(j){ if(j.success){ st.textContent='Danke! Deine Nachricht ist beim Entwickler gelandet.'; setTimeout(closeFeedback,1400);} else { st.textContent='Konnte nicht gesendet werden – bitte später erneut versuchen.'; } })
+   .catch(function(){ st.textContent='Netzwerkfehler – bitte später erneut versuchen.'; });
+}
 var lb=document.getElementById('lb'), lbimg=lb.querySelector('img');
 document.addEventListener('click',function(e){
   var tab=e.target.closest('.tab'); if(tab){showView(tab.dataset.view);return;}
   var lzrow=e.target.closest('.lzrow'); if(lzrow && lzrow.dataset.lz && !lzrow.classList.contains('empty')){renderLzDetail(lzrow.dataset.lz);return;}
   var img=e.target.closest('.abb img'); if(img){lbimg.src=img.src;lb.style.display='flex';document.body.classList.add('lbopen');return;}
   if(e.target.closest('#lb')){lb.style.display='none';document.body.classList.remove('lbopen');return;}
-  var act=e.target.closest('[data-act]'); if(act){var card=act.closest('.card');var id=card.dataset.id; if(act.dataset.act==='mark')toggleMark(id,act); else if(act.dataset.act==='report')reportQuestion(id); return;}
+  var act=e.target.closest('[data-act]'); if(act){var card=act.closest('.card');var id=card.dataset.id; if(act.dataset.act==='mark')toggleMark(id,act); else if(act.dataset.act==='report'){var q=qById[id];openFeedback({qid:id,mod:q.mod,mw:q.mw,lz:q.lz,q:q.q,src:q.src});} return;}
   var opt=e.target.closest('.opt'); if(opt){var card=opt.closest('.card'); if(card && !card.classList.contains('answered')){card.classList.add('answered'); var ok=!!opt.dataset.correct; opt.classList.add(ok?'chosen-correct':'chosen-wrong');
     if(QZ && ST.view==='quiz'){} // handled below
     if(QZ){var qid=card.dataset.id; if(QZ.ids[QZ.idx]===qid && !QZ.res.hasOwnProperty(qid)){QZ.res[qid]=ok; var nx=document.getElementById('nx'); if(nx)nx.disabled=false;}}
   } return; }
 });
+document.getElementById('fbsend').addEventListener('click',sendFeedback);
+document.getElementById('fbcancel').addEventListener('click',closeFeedback);
+document.getElementById('fb').addEventListener('click',function(e){if(e.target.id==='fb')closeFeedback();});
+var tb=document.getElementById('themebtn'); if(tb)tb.addEventListener('click',function(){var d=document.body.classList.toggle('dark');try{localStorage.kz_theme=d?'dark':'light';}catch(e){}});
 updMarkCount(); showView('ueben');
 })();
 </script>
