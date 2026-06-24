@@ -348,7 +348,14 @@ body.dark .navbar{ background:color-mix(in oklab, var(--bg) 78%, transparent); }
 .bcrumb .bc-sep{ color:var(--line-strong); padding:0 1px; font-size:12px; user-select:none }
 .bcrumb .bc-dot{ width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:6px }
 .bcrumb .bc-id{ font-feature-settings:"tnum" 1; font-variant-numeric:tabular-nums; letter-spacing:.015em }
-@media(max-width:600px){ .bcrumb{ font-size:11.5px; padding:7px 2px } .bcrumb .bc{ padding:3px 7px } }
+.bcrumb .bc.ver{ max-width:min(46ch,55vw); overflow:hidden; text-overflow:ellipsis; }
+@media(max-width:600px){
+  .bcrumb{ font-size:11.5px; padding:7px 2px }
+  .bcrumb .bc{ padding:3px 7px }
+  .bcrumb .bc.ver,.bcrumb .bc.ver + .bc-sep,.bcrumb .bc-sep:has(+.bc.ver){ display:none }
+  /* Fallback wenn :has() unsupported: blende bc.ver direkt aus (Trennstrich davor bleibt — minor) */
+  .bcrumb .bc.ver{ display:none }
+}
 </style></head><body class="mode-klausur">
 <script>try{if(localStorage.kz_theme==='dark'||(localStorage.kz_theme==null&&matchMedia('(prefers-color-scheme:dark)').matches))document.body.classList.add('dark');if(localStorage.kz_game==='1')document.body.classList.add('gamify');}catch(e){}</script>
 <div class="topbar">Stay Cheesy! 🧀</div>
@@ -1039,6 +1046,9 @@ updMarkCount(); showView('lernen');
   var bc=document.getElementById('bcrumb'), app=document.getElementById('app'), navEl=document.querySelector('.navbar');
   if(!bc||!app||!navEl) return;
   var modNames={M02:"Bausteine",M03:"Zellbiologie",M04:"Physiologie"};
+  // Veranstaltung pro Frage-ID — direkt aus dem Daten-Modul der App (window.S1)
+  var qVer={};
+  try{ if(window.S1&&window.S1.questions) window.S1.questions.forEach(function(q){ qVer[q.id]=q.ver||''; }); }catch(e){}
   function modCol(m){ return (getComputedStyle(document.documentElement).getPropertyValue('--'+(m||'').toLowerCase())||'').trim()||'#666'; }
   // Dynamische Navbar-Höhe → --nav-h
   function syncNavH(){ var h=Math.round(navEl.getBoundingClientRect().height); document.documentElement.style.setProperty('--nav-h', h+'px'); }
@@ -1073,8 +1083,13 @@ updMarkCount(); showView('lernen');
     bc.appendChild(sep());
     bc.appendChild(crumb('lz',null,function(){ scrollToSel('.card[data-lz="'+lz+'"]'); },
       '<span class="bc-id">'+lz+'</span>'));
-    bc.appendChild(sep());
-    bc.appendChild(crumb('last',null,null,'<span class="bc-id">'+qid+'</span>'));
+    var ver=qVer[qid];
+    if(ver){
+      bc.appendChild(sep());
+      var vEl=document.createElement('span');
+      vEl.className='bc ver last'; vEl.textContent=ver; vEl.title=ver;
+      bc.appendChild(vEl);
+    }
     bc.classList.add('show');
   }
   function pickTop(){
