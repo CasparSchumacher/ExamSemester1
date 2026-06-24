@@ -356,6 +356,26 @@ body.dark .navbar{ background:color-mix(in oklab, var(--bg) 78%, transparent); }
   /* Fallback wenn :has() unsupported: blende bc.ver direkt aus (Trennstrich davor bleibt — minor) */
   .bcrumb .bc.ver{ display:none }
 }
+
+/* Fortschritts-Ringe (Dashboard-Hero) */
+.ring{ display:block }
+.ring circle{ transition:stroke-dashoffset .8s var(--ease) }
+.ring-pct{ font-family:var(--font-ui); font-weight:700; fill:var(--ink); letter-spacing:-.02em; font-size:20px }
+.ring-hero{ display:grid; grid-template-columns:repeat(4,minmax(120px,1fr)); gap:12px; margin:14px 0 4px }
+.ring-card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--r-md); padding:14px 10px; display:flex; flex-direction:column; align-items:center; gap:6px; box-shadow:var(--sh-1); transition:transform .15s var(--ease),box-shadow .15s var(--ease) }
+.ring-card:hover{ transform:translateY(-1px); box-shadow:var(--sh-2) }
+.ring-card .rc-label{ font-size:11.5px; font-weight:700; color:var(--mut); text-transform:uppercase; letter-spacing:.05em }
+.ring-card .rc-stat{ font-size:12px; color:var(--mut); font-variant-numeric:tabular-nums; text-align:center; line-height:1.35 }
+.ring-card .rc-stat b{ color:var(--ink); font-weight:600 }
+.ring-card.rc-total{ border-color:var(--line-strong) }
+.ring-card.rc-empty .ring-pct{ fill:var(--mut) }
+@media(max-width:600px){ .ring-hero{ grid-template-columns:repeat(2,minmax(120px,1fr)); gap:10px } .ring-card{ padding:11px 8px } }
+
+/* Sanfter Panel-Crossfade beim View-Wechsel (Card-Reveal) */
+@media(prefers-reduced-motion:no-preference){
+  #app > *{ animation:panel-in .22s var(--ease) both }
+  @keyframes panel-in{ from{ opacity:0; transform:translateY(4px) } to{ opacity:1; transform:none } }
+}
 </style></head><body class="mode-klausur">
 <script>try{if(localStorage.kz_theme==='dark'||(localStorage.kz_theme==null&&matchMedia('(prefers-color-scheme:dark)').matches))document.body.classList.add('dark');if(localStorage.kz_game==='1')document.body.classList.add('gamify');}catch(e){}</script>
 <div class="topbar">Stay Cheesy! 🧀</div>
@@ -1132,6 +1152,68 @@ updMarkCount(); showView('lernen');
   window.addEventListener('scroll', schedule, {passive:true});
   window.addEventListener('resize', schedule);
   setupIO();
+})();
+</script>
+<script>
+/* === Fortschritts-Hero: SVG-Ringe pro Modul (post-render enhance) =========== */
+(function(){
+  var app=document.getElementById('app'); if(!app) return;
+  function ring(p,size,stroke,color,isEmpty){
+    var r=(size-stroke)/2, c=2*Math.PI*r, off=c*(1-Math.max(0,Math.min(100,p))/100);
+    var cx=size/2, cy=size/2;
+    return '<svg class="ring" width="'+size+'" height="'+size+'" viewBox="0 0 '+size+' '+size+'" aria-hidden="true">'
+      +'<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="var(--line)" stroke-width="'+stroke+'"/>'
+      +(isEmpty?'':'<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="'+stroke+'" stroke-dasharray="'+c.toFixed(2)+'" stroke-dashoffset="'+off.toFixed(2)+'" stroke-linecap="round" transform="rotate(-90 '+cx+' '+cy+')"/>')
+      +'<text x="'+cx+'" y="'+(cy+1)+'" text-anchor="middle" dominant-baseline="middle" class="ring-pct">'+Math.round(p)+'%</text>'
+      +'</svg>';
+  }
+  function enhanceFortschritt(){
+    var ps=app.querySelector('.prog-summary');
+    if(!ps||ps.dataset.enhanced==='1') return;
+    var fmods=[].slice.call(ps.querySelectorAll('.fmod'));
+    if(!fmods.length){ ps.dataset.enhanced='1'; return; } // empty state
+    var stats=fmods.map(function(fmod){
+      var bar=fmod.querySelector(':scope > .bar > i');
+      var color=bar?(bar.style.background||'var(--mut)'):'var(--mut)';
+      var mchip=fmod.querySelector('.mchip');
+      var mod=mchip?mchip.textContent.trim():'?';
+      var hd=fmod.querySelector('.fmod-hd');
+      var m=hd?hd.textContent.match(/(\d+)\/(\d+).*?(\d+)\/(\d+)/):null;
+      var c=m?+m[1]:0, a=m?+m[3]:0, t=m?+m[4]:0;
+      return {mod:mod, color:color, c:c, a:a, t:t};
+    });
+    var T=stats.reduce(function(s,x){return s+x.t},0);
+    var C=stats.reduce(function(s,x){return s+x.c},0);
+    var A=stats.reduce(function(s,x){return s+x.a},0);
+    // Ring zeigt Trefferquote (richtig von beantwortet) — konsistent mit bigscore
+    var totalPct=A?Math.round(C/A*100):0;
+    var hero=document.createElement('div');
+    hero.className='ring-hero';
+    var totalEmpty=A===0;
+    var totalDone=T?Math.round(A/T*100):0;
+    hero.innerHTML=
+      '<div class="ring-card rc-total'+(totalEmpty?' rc-empty':'')+'">'
+        +ring(totalPct,108,9,'var(--ink)',totalEmpty)
+        +'<div class="rc-label">Gesamt</div>'
+        +'<div class="rc-stat"><b>'+C+'</b> / '+A+' richtig<br><span>'+A+'/'+T+' bearbeitet ('+totalDone+'%)</span></div>'
+      +'</div>'
+      +stats.map(function(s){
+        var pct=s.a?Math.round(s.c/s.a*100):0, empty=s.a===0;
+        var done=s.t?Math.round(s.a/s.t*100):0;
+        return '<div class="ring-card'+(empty?' rc-empty':'')+'">'
+          +ring(pct,108,9,s.color,empty)
+          +'<div class="rc-label">'+s.mod+'</div>'
+          +'<div class="rc-stat"><b>'+s.c+'</b> / '+s.a+' richtig<br><span>'+s.a+'/'+s.t+' bearbeitet ('+done+'%)</span></div>'
+        +'</div>';
+      }).join('');
+    var modprog=ps.querySelector('.modprog');
+    if(modprog) modprog.parentNode.insertBefore(hero, modprog);
+    else ps.appendChild(hero);
+    ps.dataset.enhanced='1';
+  }
+  var mo=new MutationObserver(enhanceFortschritt);
+  mo.observe(app,{childList:true, subtree:false});
+  enhanceFortschritt();
 })();
 </script>
 </body></html>
