@@ -1,4 +1,4 @@
-# Kreuzzug — Klausurtrainer
+# Casomorphin
 
 Inoffizielles, privates Lernprojekt zum Üben von Übungsfragen, geordnet nach **Modul → Modulwoche → Lernziel**.
 
