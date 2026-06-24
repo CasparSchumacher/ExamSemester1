@@ -376,6 +376,39 @@ body.dark .navbar{ background:color-mix(in oklab, var(--bg) 78%, transparent); }
   #app > *{ animation:panel-in .22s var(--ease) both }
   @keyframes panel-in{ from{ opacity:0; transform:translateY(4px) } to{ opacity:1; transform:none } }
 }
+
+/* ⌘K Befehlspalette */
+.cmdk-overlay{ position:fixed; inset:0; background:rgba(20,16,12,.42); -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px);
+  z-index:70; display:none; align-items:flex-start; justify-content:center; padding:10vh 16px 16px }
+.cmdk-overlay.open{ display:flex; animation:cmdk-fade .14s ease-out }
+@keyframes cmdk-fade{ from{ opacity:0 } to{ opacity:1 } }
+.cmdk{ background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); width:100%; max-width:620px;
+  box-shadow:var(--sh-pop); overflow:hidden; display:flex; flex-direction:column; max-height:min(72vh, 640px) }
+.cmdk-input-wrap{ display:flex; align-items:center; gap:11px; padding:14px 16px; border-bottom:1px solid var(--line) }
+.cmdk-icon{ color:var(--mut); flex:0 0 auto; line-height:0 }
+.cmdk-input{ flex:1; background:transparent; border:none; outline:none; font-family:var(--font-ui); font-size:16px;
+  color:var(--ink); letter-spacing:-.006em; min-width:0 }
+.cmdk-input::placeholder{ color:var(--mut) }
+.cmdk-list{ overflow-y:auto; padding:6px 0; flex:1 }
+.cmdk-section{ font-size:10.5px; font-weight:700; color:var(--mut); text-transform:uppercase; letter-spacing:.06em;
+  padding:10px 16px 4px }
+.cmdk-item{ display:flex; align-items:center; gap:9px; padding:8px 16px; cursor:pointer; min-height:36px;
+  transition:background .1s var(--ease) }
+.cmdk-item:hover{ background:var(--surface-2) }
+.cmdk-item.active{ background:color-mix(in oklab, var(--brand) 12%, var(--surface-2)) }
+.cmdk-item .dot{ width:8px; height:8px; border-radius:50%; flex:0 0 auto }
+.cmdk-item .lbl{ font-weight:600; font-size:14px; color:var(--ink); white-space:nowrap }
+.cmdk-item .id{ font-variant-numeric:tabular-nums; font-weight:600; font-size:13px; color:var(--ink);
+  letter-spacing:.01em; flex:0 0 auto }
+.cmdk-item .hint{ font-size:13px; color:var(--mut); flex:1 1 auto; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0 }
+.cmdk-item .kbd{ font-size:10.5px; color:var(--mut); border:1px solid var(--line); border-radius:5px;
+  padding:1px 6px; font-family:var(--font-ui); font-weight:600; flex:0 0 auto }
+.cmdk-empty{ padding:26px 16px; text-align:center; color:var(--mut); font-size:14px }
+.cmdk-footer{ display:flex; flex-wrap:wrap; align-items:center; gap:14px; padding:9px 16px; border-top:1px solid var(--line);
+  font-size:11.5px; color:var(--mut); background:var(--surface-2) }
+.cmdk-footer .k{ background:var(--surface); border:1px solid var(--line); border-radius:5px; padding:1px 6px;
+  font-family:var(--font-ui); font-weight:600; color:var(--ink); margin-right:4px }
+@media(max-width:600px){ .cmdk-overlay{ padding:6vh 8px 8px } .cmdk{ max-height:88vh } .cmdk-footer{ display:none } }
 </style></head><body class="mode-klausur">
 <script>try{if(localStorage.kz_theme==='dark'||(localStorage.kz_theme==null&&matchMedia('(prefers-color-scheme:dark)').matches))document.body.classList.add('dark');if(localStorage.kz_game==='1')document.body.classList.add('gamify');}catch(e){}</script>
 <div class="topbar">Stay Cheesy! 🧀</div>
@@ -1214,6 +1247,146 @@ updMarkCount(); showView('lernen');
   var mo=new MutationObserver(enhanceFortschritt);
   mo.observe(app,{childList:true, subtree:false});
   enhanceFortschritt();
+})();
+</script>
+<script>
+/* === ⌘K Befehlspalette ===================================================== */
+(function(){
+  var S=window.S1; if(!S) return;
+  var LZ=S.lernziele||[];
+  var MODS=['M02','M03','M04'];
+  var MODNAMES=(S.meta&&S.meta.modnames)||{};
+  var modCol=function(m){ return (getComputedStyle(document.documentElement).getPropertyValue('--'+(m||'').toLowerCase())||'#666').trim(); };
+  var esc=function(s){ var d=document.createElement('div'); d.textContent=(s==null?'':s); return d.innerHTML; };
+
+  // Overlay erzeugen
+  var overlay=document.createElement('div'); overlay.className='cmdk-overlay';
+  overlay.innerHTML='<div class="cmdk" role="dialog" aria-label="Befehlspalette">'
+    +'<div class="cmdk-input-wrap"><span class="cmdk-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span>'
+    +'<input class="cmdk-input" placeholder="Springe zu Lernziel, Modul, Tab …" autocomplete="off" spellcheck="false" aria-label="Suche"></div>'
+    +'<div class="cmdk-list"></div>'
+    +'<div class="cmdk-footer"><span><span class="k">↑</span><span class="k">↓</span>Navigieren</span>'
+    +'<span><span class="k">↵</span>Öffnen</span><span><span class="k">Esc</span>Schließen</span></div></div>';
+  document.body.appendChild(overlay);
+
+  var input=overlay.querySelector('.cmdk-input');
+  var list=overlay.querySelector('.cmdk-list');
+
+  // Statische Items
+  var TABS=[
+    {kind:'tab', view:'lernen', label:'Üben', hint:'Lernziele oder Fragen üben'},
+    {kind:'tab', view:'quiz', label:'Quizzen', hint:'Zufallsquiz starten'},
+    {kind:'tab', view:'lernskript', label:'Lernen', hint:'Kompakt-Skript pro Lernziel'},
+    {kind:'tab', view:'markiert', label:'★ Markiert', hint:'Markierte Fragen'},
+    {kind:'tab', view:'fortschritt', label:'Fortschritt', hint:'Dein Lernfortschritt'},
+    {kind:'tab', view:'analyse', label:'Analyse', hint:'Schwerpunkte & Häufigkeiten'},
+    {kind:'tab', view:'hilfe', label:'Hilfe', hint:'Anleitung & Feedback'},
+    {kind:'action', id:'gamify-toggle', label:'🧀 Käse-Modus umschalten', hint:'Reifekeller, Streak, Abzeichen'}
+  ];
+  var MODITEMS=MODS.map(function(m){ return {kind:'mod', mod:m, label:m+(MODNAMES[m]?' · '+MODNAMES[m]:''), hint:'Üben gefiltert auf '+m}; });
+  var MWITEMS=(function(){
+    var pairs={}; LZ.forEach(function(l){ pairs[l.mod+'|'+l.mw]=1; });
+    return Object.keys(pairs).sort().map(function(k){ var p=k.split('|'); return {kind:'mw', mod:p[0], mw:p[1], label:p[0]+' · '+p[1], hint:'Üben gefiltert auf '+p[0]+' '+p[1]}; });
+  })();
+  var LZITEMS=LZ.map(function(l){ return {kind:'lz', id:l.id, label:l.id, hint:l.t, mod:l.mod, mw:l.mw}; });
+
+  var current=[], sel=0;
+
+  function score(it,lq){
+    var lab=(it.label||'').toLowerCase(), hint=(it.hint||'').toLowerCase(), id=(it.id||'').toLowerCase();
+    var p1=lab.indexOf(lq), p2=hint.indexOf(lq), p3=id.indexOf(lq);
+    if(p1<0&&p2<0&&p3<0) return -1;
+    var s=0;
+    if(p3===0) s+=120; else if(p3>=0) s+=60;
+    if(p1===0) s+=80; else if(p1>=0) s+=40;
+    if(p2>=0) s+=20;
+    return s;
+  }
+  function compute(q){
+    if(!q){ return [{sec:'Navigieren'}].concat(TABS.slice(0,7), [{sec:'Module'}], MODITEMS, [{sec:'Käse'}], [TABS[7]]); }
+    var lq=q.toLowerCase();
+    var all=TABS.concat(MODITEMS).concat(MWITEMS).concat(LZITEMS);
+    var scored=[]; all.forEach(function(it){ var s=score(it,lq); if(s>=0) scored.push({it:it,s:s}); });
+    scored.sort(function(a,b){ return b.s-a.s; });
+    var top=scored.slice(0,40).map(function(x){return x.it;});
+    var labels={tab:'Tabs', mod:'Module', mw:'Modulwochen', lz:'Lernziele', action:'Aktionen'};
+    var out=[], seen={};
+    top.forEach(function(it){ if(!seen[it.kind]){ out.push({sec:labels[it.kind]||''}); seen[it.kind]=1; } out.push(it); });
+    return out;
+  }
+  function selectables(){ return current.filter(function(x){return !x.sec;}); }
+  function render(){
+    var html='', si=0;
+    current.forEach(function(e,ci){
+      if(e.sec){ html+='<div class="cmdk-section">'+esc(e.sec)+'</div>'; return; }
+      var active=(si===sel);
+      html+='<div class="cmdk-item'+(active?' active':'')+'" data-i="'+ci+'">';
+      if(e.kind==='mod'||e.kind==='mw'||e.kind==='lz') html+='<span class="dot" style="background:'+modCol(e.mod)+'"></span>';
+      if(e.kind==='lz'){ html+='<span class="id">'+esc(e.id)+'</span><span class="hint">'+esc(e.hint)+'</span>'; }
+      else { html+='<span class="lbl">'+esc(e.label)+'</span>'; if(e.hint) html+='<span class="hint">'+esc(e.hint)+'</span>'; }
+      if(e.kind==='tab') html+='<span class="kbd">Tab</span>';
+      else if(e.kind==='lz') html+='<span class="kbd">LZ</span>';
+      else if(e.kind==='mw') html+='<span class="kbd">MW</span>';
+      else if(e.kind==='mod') html+='<span class="kbd">Mod</span>';
+      else if(e.kind==='action') html+='<span class="kbd">↻</span>';
+      html+='</div>';
+      si++;
+    });
+    if(!html) html='<div class="cmdk-empty">Keine Treffer</div>';
+    list.innerHTML=html;
+    var a=list.querySelector('.cmdk-item.active'); if(a) a.scrollIntoView({block:'nearest'});
+  }
+  function exec(item){
+    close();
+    setTimeout(function(){
+      if(item.kind==='tab'){
+        var t=document.querySelector('.tab[data-view="'+item.view+'"]'); if(t) t.click();
+      } else if(item.kind==='action' && item.id==='gamify-toggle'){
+        var gb=document.getElementById('gamebtn'); if(gb) gb.click();
+      } else if(item.kind==='mod' || item.kind==='mw'){
+        var ln=document.querySelector('.tab[data-view="lernen"]'); if(ln) ln.click();
+        setTimeout(function(){
+          var modBtn=document.querySelector('.modbtn[data-mod="'+item.mod+'"]'); if(modBtn) modBtn.click();
+          if(item.kind==='mw'){ var mwBtn=document.querySelector('.mwbtn[data-mw="'+item.mw+'"]'); if(mwBtn) mwBtn.click(); }
+        }, 60);
+      } else if(item.kind==='lz'){
+        // synthetic .lzgo triggert renderLzDetail via document click handler im Hauptscript
+        var el=document.createElement('span'); el.className='lzgo'; el.dataset.lz=item.id;
+        el.style.cssText='position:absolute;left:-9999px';
+        document.body.appendChild(el); el.click(); setTimeout(function(){ document.body.removeChild(el); }, 0);
+      }
+    }, 10);
+  }
+  function open(){ overlay.classList.add('open'); input.value=''; sel=0; current=compute(''); render(); setTimeout(function(){ input.focus(); }, 20); }
+  function close(){ overlay.classList.remove('open'); input.blur(); }
+
+  input.addEventListener('input', function(){ sel=0; current=compute(input.value.trim()); render(); });
+  input.addEventListener('keydown', function(e){
+    var items=selectables();
+    if(e.key==='ArrowDown'){ e.preventDefault(); if(items.length){ sel=(sel+1)%items.length; render(); } }
+    else if(e.key==='ArrowUp'){ e.preventDefault(); if(items.length){ sel=(sel-1+items.length)%items.length; render(); } }
+    else if(e.key==='Enter'){ e.preventDefault(); if(items[sel]) exec(items[sel]); }
+    else if(e.key==='Escape'){ e.preventDefault(); close(); }
+  });
+  list.addEventListener('click', function(e){
+    var it=e.target.closest('.cmdk-item'); if(!it) return;
+    var ci=+it.dataset.i; if(current[ci]&&!current[ci].sec) exec(current[ci]);
+  });
+  list.addEventListener('mousemove', function(e){
+    var it=e.target.closest('.cmdk-item'); if(!it) return;
+    var ci=+it.dataset.i; if(current[ci]&&!current[ci].sec){
+      var newSel=selectables().indexOf(current[ci]); if(newSel>=0 && newSel!==sel){ sel=newSel; render(); }
+    }
+  });
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) close(); });
+
+  // Globales Keybinding
+  document.addEventListener('keydown', function(e){
+    if((e.metaKey||e.ctrlKey) && (e.key==='k'||e.key==='K')){
+      e.preventDefault();
+      if(overlay.classList.contains('open')) close(); else open();
+    }
+  });
 })();
 </script>
 </body></html>
