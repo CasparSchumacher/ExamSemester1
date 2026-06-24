@@ -409,6 +409,88 @@ body.dark .navbar{ background:color-mix(in oklab, var(--bg) 78%, transparent); }
 .cmdk-footer .k{ background:var(--surface); border:1px solid var(--line); border-radius:5px; padding:1px 6px;
   font-family:var(--font-ui); font-weight:600; color:var(--ink); margin-right:4px }
 @media(max-width:600px){ .cmdk-overlay{ padding:6vh 8px 8px } .cmdk{ max-height:88vh } .cmdk-footer{ display:none } }
+
+/* === Käse-Modus-Politur (alles nur unter body.gamify) ====================== */
+/* HUD edler: Gradient, Schatten, Käse-Akzent */
+body.gamify .hud{
+  background:linear-gradient(135deg,#fff6da 0%,#fdfae7 55%,#fff6da 100%);
+  border:1px solid #ecdca6; border-radius:14px;
+  box-shadow:var(--sh-1),0 0 0 1px rgba(192,125,26,.04);
+}
+body.dark.gamify .hud{ background:linear-gradient(135deg,#241d0e 0%,#1b180d 55%,#241d0e 100%); border-color:#3a3216 }
+
+/* XP-Bar mit animierten Käse-Streifen */
+body.gamify .xpbar{ background:rgba(168,106,18,.12); border:1px solid rgba(192,125,26,.18) }
+body.gamify .xpbar>i{
+  background:repeating-linear-gradient(45deg,#e0a52a 0,#e0a52a 8px,#f6d860 8px,#f6d860 16px);
+  background-size:22px 100%;
+}
+body.dark.gamify .xpbar{ background:rgba(240,194,58,.10); border-color:rgba(240,194,58,.18) }
+@media(prefers-reduced-motion:no-preference){
+  body.gamify .xpbar>i{ animation:cheese-stripes 2.4s linear infinite }
+  @keyframes cheese-stripes{ from{background-position:0 0} to{background-position:22px 0} }
+}
+
+/* Reifekeller-Hero: Käse atmet, Karte mit warmem Glow */
+body.gamify .acard.gamebig{
+  background:radial-gradient(circle at 20% 25%,rgba(230,165,42,.12) 0%,transparent 55%),var(--surface);
+  border-color:#ecdca6;
+}
+body.dark.gamify .acard.gamebig{ border-color:#3a3216 }
+@media(prefers-reduced-motion:no-preference){
+  body.gamify .gamebig .gb-cheese{ animation:cheese-breathe 4.5s ease-in-out infinite; transform-origin:50% 60% }
+  @keyframes cheese-breathe{ 0%,100%{transform:scale(1) rotate(-.4deg)} 50%{transform:scale(1.035) rotate(.4deg)} }
+  body.gamify .gamebig:hover .gb-cheese{ animation:cheese-wiggle .55s ease-in-out }
+  @keyframes cheese-wiggle{ 0%,100%{transform:rotate(0)} 25%{transform:rotate(-5deg) scale(1.06)} 60%{transform:rotate(4deg) scale(1.06)} }
+}
+
+/* XP-Popup mit Käse-Emoji + warmem Goldton */
+body.gamify .xppop{ color:#a86a12!important; font-size:16px; text-shadow:0 1px 2px rgba(168,106,18,.22) }
+body.gamify .xppop::before{ content:"🧀 " }
+body.dark.gamify .xppop{ color:#f0c23a!important }
+
+/* Klausur-Modus: richtige Antwort käsegolden statt nur grün */
+body.gamify.mode-klausur .card.answered .opt.correct,
+body.gamify.mode-klausur .card.answered .opt.correct:hover{
+  background:linear-gradient(135deg,#fff6da 0%,#fef0c9 100%)!important;
+  border-color:#e0a52a!important;
+}
+body.gamify.mode-klausur .card.answered .opt.correct .chk{ color:#a86a12 }
+body.dark.gamify.mode-klausur .card.answered .opt.correct,
+body.dark.gamify.mode-klausur .card.answered .opt.correct:hover{
+  background:linear-gradient(135deg,#2d2410 0%,#1f1a0c 100%)!important;
+  border-color:#8a6f1c!important;
+}
+
+/* Gamepill (oben rechts) Hover-Glow */
+body.gamify .gamepill{ transition:box-shadow .2s var(--ease),transform .15s var(--ease) }
+body.gamify .gamepill:hover{
+  box-shadow:0 0 0 4px rgba(192,125,26,.16),0 4px 14px -4px rgba(192,125,26,.42);
+  transform:translateY(-1px);
+}
+
+/* Gamestat-Kacheln Hover-Lift + Käse-Akzent */
+body.gamify .acard.gamestat{
+  background:radial-gradient(circle at 85% 15%,rgba(246,216,96,.09),transparent 55%),var(--surface);
+  transition:transform .18s var(--ease),box-shadow .18s var(--ease);
+}
+body.gamify .acard.gamestat:hover{ transform:translateY(-2px); box-shadow:var(--sh-2) }
+
+/* Reifegrad-Bars mit subtiler diagonaler Käse-Textur */
+body.gamify .acard .mp .bar{ height:10px; border-radius:6px }
+body.gamify .acard .mp .bar>i{
+  background-image:repeating-linear-gradient(45deg,transparent 0 6px,rgba(255,255,255,.18) 6px 12px);
+}
+body.dark.gamify .acard .mp .bar>i{
+  background-image:repeating-linear-gradient(45deg,transparent 0 6px,rgba(255,255,255,.08) 6px 12px);
+}
+
+/* Badges aktiv: dezenter Goldglow */
+body.gamify .badge-card.on{ box-shadow:0 0 0 1px rgba(224,165,42,.28),var(--sh-1) }
+
+/* Kspill (Käsino-Banner) Hover-Lift */
+body.gamify .kspill{ transition:transform .15s var(--ease),box-shadow .15s var(--ease) }
+body.gamify .kspill:hover{ transform:translateY(-1px); box-shadow:var(--sh-1) }
 </style></head><body class="mode-klausur">
 <script>try{if(localStorage.kz_theme==='dark'||(localStorage.kz_theme==null&&matchMedia('(prefers-color-scheme:dark)').matches))document.body.classList.add('dark');if(localStorage.kz_game==='1')document.body.classList.add('gamify');}catch(e){}</script>
 <div class="topbar">Stay Cheesy! 🧀</div>
