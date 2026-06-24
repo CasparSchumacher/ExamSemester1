@@ -1,6 +1,9 @@
 <!DOCTYPE html><html lang="de"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow">
 <title>Casomorphin · Klausurtrainer · Semester 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script>try{if(!localStorage.getItem('kz_pilger'))location.replace('index.html');}catch(e){}</script>
 <style>
 :root{--ink:#1f2430;--mut:#6b7280;--line:#e5e7eb;--bg:#f7f8fa}
@@ -31,7 +34,7 @@ body.dark .helpfab{background:#171c22}
 .flabel{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);margin-right:2px}
 .chip{border:1px solid var(--line);background:#fff;border-radius:20px;padding:5px 12px;font-size:13px;font-weight:600;cursor:pointer;color:var(--ink)}
 .chip.active{background:var(--ink);color:#fff;border-color:var(--ink)}
-.chip.modbtn[data-mod=M02].active{background:#2563eb;border-color:#2563eb} .chip.modbtn[data-mod=M03].active{background:#16a34a;border-color:#16a34a} .chip.modbtn[data-mod=M04].active{background:#9333ea;border-color:#9333ea}
+.chip.modbtn[data-mod=M02].active{background:#4338ca;border-color:#4338ca} .chip.modbtn[data-mod=M03].active{background:#047857;border-color:#047857} .chip.modbtn[data-mod=M04].active{background:#7c3aed;border-color:#7c3aed}
 .lbl{font-size:12px;color:var(--mut)} .sep{width:1px;height:20px;background:var(--line);margin:0 3px}
 .btn{padding:7px 11px;border:1px solid var(--line);background:#fff;border-radius:9px;cursor:pointer;font-size:13px;color:var(--ink)}
 .btn.active{background:var(--ink);color:#fff;border-color:var(--ink)}
@@ -248,6 +251,84 @@ body.dark .kstoast{background:#241d0e;border-color:#3a3216}
 @media(max-width:600px){.kstoast{left:12px;right:12px;max-width:none}}
 @media(prefers-reduced-motion:reduce){.xppop,.gmbox,.kstoast.show{animation:none} .xpbar>i{transition:none}}
 @media print{ #toTop,.toc,.hud,.gameseg{display:none!important} .tabs,.nav-top,.toolbar,.cardacts,.qnav{display:none!important} .answer,.opts{display:block!important} .chk{visibility:visible!important} .opt.correct{background:#e7f8ec!important;-webkit-print-color-adjust:exact;print-color-adjust:exact} }
+
+/* ============================================================================
+   DESIGN REFRESH · Increment 1 — Fundament, Typografie, Oberflächen
+   Strikt ADDITIV: keine Klassennamen/IDs/data-Attribute/JS-Hooks geändert.
+   Schriften via CDN (Vorschau) — vor Finalisierung self-hosten (offline-sicher).
+   ============================================================================ */
+html{scroll-behavior:smooth}
+:root{
+  --bg:#f4f1ec; --surface:#fffdf9; --surface-2:#f7f4ee;
+  --ink:#222019; --mut:#76706a; --line:#e8e2d7; --line-strong:#dbd4c6;
+  --brand:#0f766e;
+  --m02:#4338ca; --m03:#047857; --m04:#7c3aed;
+  --font-ui:"Hanken Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --r-sm:10px; --r-md:14px; --r-lg:18px;
+  --sh-1:0 1px 2px rgba(40,30,12,.06),0 1px 1px rgba(40,30,12,.04);
+  --sh-2:0 6px 18px -6px rgba(40,30,12,.16),0 2px 6px -3px rgba(40,30,12,.10);
+  --sh-pop:0 22px 55px -16px rgba(40,30,12,.34);
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+body.dark{ --bg:#0f1311; --surface:#161b18; --surface-2:#1b211d; --ink:#e9e6df; --mut:#9aa39a; --line:#283029; --line-strong:#36413a; --brand:#2dd4bf;
+  --sh-1:0 1px 2px rgba(0,0,0,.45); --sh-2:0 8px 22px -8px rgba(0,0,0,.6); --sh-pop:0 24px 60px -16px rgba(0,0,0,.75); }
+body.gamify{ --bg:#f7f0e0; --surface:#fffdf5; --surface-2:#fbf3df; --line:#ecdfbf; --line-strong:#e1cfa2; }
+body.dark.gamify{ --bg:#15110a; --surface:#1c170d; --surface-2:#221b0e; --line:#3a3216; --line-strong:#4a3f1e; }
+
+body{ font-family:var(--font-ui); font-size:15.5px; letter-spacing:-.004em; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  background:radial-gradient(115% 80% at 100% -8%, color-mix(in oklab, var(--brand) 7%, transparent), transparent 55%) fixed, var(--bg); }
+
+/* Typo-Hierarchie — eine Familie, verschiedene Gewichte/Tracking */
+h1,h3,.bigscore,.gb-name,.gs-big,.mod-head,.lzhead-text,.ul-h{ letter-spacing:-.018em; font-weight:700; }
+h3{font-weight:700; letter-spacing:-.012em}
+.mod-head{ letter-spacing:-.022em; }
+.lz-id,.mchip,.lzrow .id{ font-feature-settings:"tnum" 1,"cv11" 1; font-variant-numeric:tabular-nums; letter-spacing:.02em; font-weight:600; }
+.frage{ font-size:16.5px; line-height:1.5; letter-spacing:-.006em; font-weight:500; }
+
+/* Fokus-Sichtbarkeit (a11y) */
+:where(a,button,input,textarea,[tabindex]):focus-visible{ outline:2.5px solid var(--brand); outline-offset:2px; border-radius:7px; }
+
+/* Sticky-Navbar mit Glas-Effekt */
+.navbar{ background:color-mix(in oklab, var(--bg) 80%, transparent); -webkit-backdrop-filter:saturate(1.5) blur(12px); backdrop-filter:saturate(1.5) blur(12px); border-bottom:1px solid var(--line); padding:11px 0; }
+body.dark .navbar{ background:color-mix(in oklab, var(--bg) 78%, transparent); }
+
+/* Segment-Control */
+.seg{ border:1px solid var(--line); border-radius:13px; padding:3px; box-shadow:inset 0 1px 2px rgba(40,30,12,.04); }
+.seg .tab{ transition:color .15s var(--ease),background .15s var(--ease); border-radius:10px; }
+.seg .tab.active{ box-shadow:var(--sh-1); }
+
+/* Chips & Buttons */
+.chip{ border-radius:999px; }
+.btn{ border-radius:10px; }
+.btn.mini{ border-radius:8px; }
+.chip,.btn{ transition:border-color .14s var(--ease),background .14s var(--ease),transform .14s var(--ease),box-shadow .14s var(--ease); }
+.chip:hover,.btn:hover{ border-color:var(--line-strong); }
+.chip.active,.btn.active{ box-shadow:var(--sh-1); }
+
+/* Suche */
+.search{ border-radius:13px; transition:border-color .15s,box-shadow .15s; }
+.search:focus{ border-color:var(--brand); box-shadow:0 0 0 3px color-mix(in oklab, var(--brand) 20%, transparent); }
+
+/* Karten-Oberflächen */
+.acard,.qcard,.setup,.summary,.help,.prog-summary,.ls-intro,.ls-card,.lz,.lzbox{ border-radius:var(--r-lg); box-shadow:var(--sh-1); }
+.acard,.qcard,.setup,.summary,.help,.prog-summary{ padding:18px 20px; }
+.opt{ border-radius:10px; transition:background .12s var(--ease),border-color .12s var(--ease); }
+
+/* Struktur sichtbar: Modul-/Wochen-/Lernziel-Köpfe */
+.mod-head{ border-radius:var(--r-md); box-shadow:var(--sh-2); font-size:19px; font-weight:600; padding:14px 20px; }
+.mw-head{ border-radius:999px; font-size:12px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; padding:6px 13px; }
+.lzhead-text{ font-size:17px; line-height:1.4; }
+.lzrow{ border-radius:var(--r-md); box-shadow:var(--sh-1); transition:transform .13s var(--ease),box-shadow .13s var(--ease),border-color .13s var(--ease); }
+.lzrow:hover{ transform:translateY(-1px); box-shadow:var(--sh-2); border-color:var(--line-strong); }
+
+/* Primär- & Floating-Buttons */
+.startbtn,.nextbtn{ border-radius:12px; box-shadow:var(--sh-2); transition:transform .14s var(--ease),filter .14s var(--ease); }
+.startbtn:hover,.nextbtn:hover{ transform:translateY(-1px); filter:brightness(1.04); }
+.helpfab,#toTop{ border-radius:999px; box-shadow:var(--sh-2); }
+
+/* Markenzeile & Logo */
+.topbar{ font-family:var(--font-ui); letter-spacing:.06em; }
+.logo{ width:300px; }
 </style></head><body class="mode-klausur">
 <script>try{if(localStorage.kz_theme==='dark'||(localStorage.kz_theme==null&&matchMedia('(prefers-color-scheme:dark)').matches))document.body.classList.add('dark');if(localStorage.kz_game==='1')document.body.classList.add('gamify');}catch(e){}</script>
 <div class="topbar">Stay Cheesy! 🧀</div>
@@ -299,7 +380,7 @@ body.dark .kstoast{background:#241d0e;border-color:#3a3216}
 (function(){
 var S=window.S1, Q=S.questions, LZ=S.lernziele, KW=S.kw||{}, MWI=S.mwIntro||{}, SKP=S.skriptPg||{}, NAME="Casomorphin", W3F="bc25006f-8fbf-47ec-9df9-4aa6a82634be", DONATE="https://ko-fi.com/O4G121U4EG";
 function skriptUrl(mod,mw){ var p=SKP[mod+'|'+mw]; if(!p)return null; return {url:'skript/skript-'+mod.toLowerCase()+'.pdf#page='+p, page:p}; }
-var MODNAME=S.meta.modnames, MODCOL={M02:"#2563eb",M03:"#16a34a",M04:"#9333ea"};
+var MODNAME=S.meta.modnames, MODCOL={M02:"#4338ca",M03:"#047857",M04:"#7c3aed"};
 var MODS=["M02","M03","M04"];
 var app=document.getElementById('app'), markEl=document.getElementById('markcount');
 var qById={}; Q.forEach(function(q){qById[q.id]=q});
