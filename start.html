@@ -1,13 +1,34 @@
 <!DOCTYPE html><html lang="de"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow">
-<title>Kreuzzug · Klausurtrainer</title>
+<title>Casomorphin · Klausurtrainer</title>
 <script>try{if(!localStorage.getItem('kz_pilger'))location.replace('index.html');}catch(e){}</script>
 <style>
 :root{--ink:#1f2430;--mut:#6b7280;--line:#e5e7eb;--bg:#f7f8fa}
 *{box-sizing:border-box} body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg);margin:0;line-height:1.55}
 .wrap{max-width:900px;margin:0 auto;padding:44px 20px 80px}
 h1{font-size:28px;margin:0 0 6px} .sub{color:var(--mut);font-size:15px}
-.intro{margin:16px 0 8px;font-size:15px} .intro a{color:#2563eb}
+h1.brand{margin:8px 0 6px;line-height:0}
+.logo{display:block;width:330px;max-width:86vw;height:auto}
+.logo-dark{display:none}
+body.dark .logo-light{display:none} body.dark .logo-dark{display:block}
+.intro{margin:16px 0 10px;font-size:16px} .intro a{color:#2563eb}
+.about{background:#fff;border:1px solid var(--line);border-radius:12px;margin:10px 0 6px;overflow:hidden}
+.about>summary{cursor:pointer;padding:12px 16px;font-weight:700;font-size:15px;list-style:none;display:flex;align-items:center}
+.about>summary::-webkit-details-marker{display:none}
+.about>summary::after{content:"\25be";margin-left:auto;color:var(--mut);transition:transform .2s}
+.about[open]>summary::after{transform:rotate(180deg)}
+.about .body{padding:0 16px 6px;font-size:14.5px;line-height:1.6;border-top:1px solid var(--line)}
+.about .body p{margin:12px 0}
+.feat{border:1px solid var(--line);border-radius:9px;margin:8px 0;overflow:hidden;background:var(--bg)}
+.feat>summary{cursor:pointer;list-style:none;padding:9px 13px;font-weight:700;font-size:14px;display:flex;align-items:center}
+.feat>summary::-webkit-details-marker{display:none}
+.feat>summary::after{content:"\25be";margin-left:auto;color:var(--mut);transition:transform .2s}
+.feat[open]>summary::after{transform:rotate(180deg)}
+.feat .fbody{padding:2px 13px 11px;font-size:14px;line-height:1.6}
+.feat-foot{margin:14px 0 2px;font-size:14.5px}
+body.dark .feat{background:#12171d}
+.cta-line{font-weight:600;margin:14px 0 2px}
+body.dark .about{background:#171c22}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:24px}
 .sem{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;text-decoration:none;color:inherit}
 .sem.ready{cursor:pointer;transition:.15s} .sem.ready:hover{border-color:#16a34a;box-shadow:0 4px 16px rgba(22,163,74,.14);transform:translateY(-1px)}
@@ -21,21 +42,55 @@ h1{font-size:28px;margin:0 0 6px} .sub{color:var(--mut);font-size:15px}
 .cta{margin-top:12px;font-size:13px;font-weight:600;color:#16a34a} .cta.soon{color:var(--mut);font-weight:500}
 .note{margin-top:30px;font-size:13px;color:var(--mut);border-top:1px solid var(--line);padding-top:16px}
 .note a{color:#2563eb}
-.themebtn{position:fixed;top:12px;right:14px;z-index:40;border:1px solid var(--line);background:#fff;border-radius:20px;padding:6px 12px;cursor:pointer;font-size:13px}
+.topbar{position:relative;display:flex;align-items:center;justify-content:center;background:#fdf4dd;border-bottom:1px solid #ecdca6;color:#a86a12;padding:8px 14px;font-weight:800;font-size:13px;letter-spacing:.02em}
+body.dark .topbar{background:#241d0e;border-color:#3a3216;color:#f0c23a}
+.themebtn{position:absolute;top:50%;right:12px;transform:translateY(-50%);z-index:40;border:1px solid var(--line);background:#fff;border-radius:20px;padding:6px 10px;cursor:pointer;font-size:13px}
 body.dark{--ink:#e6e8eb;--mut:#9aa3ad;--line:#2a313a;--bg:#0f1419}
 body.dark .sem,body.dark .themebtn{background:#171c22;color:var(--ink)}
 body.dark .st.soon{background:#222a33;color:#9aa3ad}
 </style></head><body>
 <script>try{if(localStorage.kz_theme==='dark'||(localStorage.kz_theme==null&&matchMedia('(prefers-color-scheme:dark)').matches))document.body.classList.add('dark');}catch(e){}</script>
-<button class="themebtn" id="themebtn">🌙 / ☀️</button>
+<div class="topbar">Stay Cheesy! 🧀<button class="themebtn" id="themebtn" title="Hell / Dunkel" aria-label="Hell/Dunkel umschalten"><svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true" style="display:block"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg></button></div>
 <div class="wrap">
-<h1>⚔️ Kreuzzug</h1>
-<div class="sub">Dein Feldzug gegen die Klausur · Übungsfragen nach Modul, Modulwoche und Lernziel</div>
-<div class="intro">Wähle ein Semester. Verfügbare Semester öffnen den Klausurtrainer: Übungsfragen im Klausurmodus,
-filterbar nach Modul / Modulwoche / Lernziel, mit Abbildungen. Jedes Kreuzchen ein Schwertstreich. 🛡️</div>
+<h1 class="brand"><img class="logo logo-light" src="img/logo-light.png" alt="Casomorphin"><img class="logo logo-dark" src="img/logo-dark.png" alt="Casomorphin"></h1>
+<div class="sub">Übungsfragen nach Modul, Modulwoche und Lernziel</div>
+<details class="about" open>
+ <summary>Was ist Casomorphin?</summary>
+ <div class="body">
+  <p><b>Casomorphin</b> ist eine Weiterentwicklung des Altklausuren-Ordners „Kreuzfahrt". Ich habe mir erlaubt, Fragen,
+  die eventuell so (oder so ähnlich) schon einmal geprüft wurden, wiederzuverwenden und in eine saubere, digitale und
+  optional gamifizierte All-in-one-Plattform zu stecken. Egal ob du vor der Klausur nur schnell ein paar zufällig
+  zusammengewürfelte Fragensätze lösen, während des Semesters schon gezielt die auf Lernziele und Modulwochen gemappten
+  Fragen üben oder einfach ein bisschen mehr Spaß beim Lernen haben willst – es ist für jeden etwas dabei. Bei der Menge
+  an Daten kann ich natürlich nicht für absolute Richtigkeit und Vollständigkeit garantieren … aber das gilt in der
+  Medizin ja ohnehin für fast alles, was wir lernen. Über die <b>„Hilfe"</b> könnt ihr mir jederzeit direkt Feedback oder
+  Verbesserungsvorschläge schicken!</p>
+ </div>
+</details>
+<details class="about">
+ <summary>Warum „Casomorphin"?</summary>
+ <div class="body">
+  <p>Das ist der Stoff, der beim Verdauen von Käse entsteht – und gern mit Koks, Crack und Heroin
+  <a href="https://www.peta.de/themen/casomorphine-kaesesucht/" target="_blank" rel="noopener">verglichen</a> wird.
+  Käse macht halt süchtig. Käse beim Lernen hoffentlich auch.</p>
+ </div>
+</details>
+<details class="about">
+ <summary>Wie nutze ich Casomorphin?</summary>
+ <div class="body">
+  <details class="feat"><summary>Lernen</summary><div class="fbody">Wähle <b>Modul</b> und <b>Modulwoche</b> und schalte dann um zwischen <b>Lernzielen</b> (Überblick je Lernziel – ein Tipp öffnet die zugehörigen Fragen) und <b>Fragen</b> (alle Fragen der Auswahl direkt zum Beantworten, im Klausurmodus mit Abbildungen). Liegst du daneben, gibt's sofort eine kurze, auf den Punkt gebrachte Erklärung.</div></details>
+  <details class="feat"><summary>Quiz</summary><div class="fbody">Stell dir aus einzelnen Modulwochen, ganzen Modulen oder dem kompletten Semester ein zufälliges Set zusammen und simuliere die Prüfung – mit Auswertung am Ende.</div></details>
+  <details class="feat"><summary>Lernskript</summary><div class="fbody">Kompaktes Kernwissen je Lernziel und Modulwoche, klausurnah destilliert – und auf Wunsch seitengenau weiter ins ausführliche Modulskript.</div></details>
+  <details class="feat"><summary>Fortschritt &amp; Markiert</summary><div class="fbody">Sieh pro Modulwoche, wie weit du bist, wiederhole gezielt nur deine Falschen, setze einzelne Wochen zurück und sammle knifflige Fragen mit einem Klick zum späteren Wiederholen.</div></details>
+  <details class="feat"><summary>Analyse</summary><div class="fbody">Mein Versuch, aus den bisher gesammelten Daten herauszulesen, welche Themen wie häufig und wichtig sind – nüchtern und ganz ohne Anspruch auf Vollständigkeit.</div></details>
+  <details class="feat"><summary>Käse-Modus (optional)</summary><div class="fbody">Wer mag, knipst oben den Käse-Modus an: dein Käse <b>reift</b> mit jeder erstmals richtig beantworteten Frage, du sammelst Reife, baust Streaks auf und schaltest Abzeichen frei. Wer's lieber nüchtern mag, lässt ihn einfach aus – dann bleibt alles, wie es ist.</div></details>
+  <p class="feat-foot">Nimm das gern und teile es mit deinen Kommilitonen! Da es ein rein studentisches Projekt ist, wäre es schön, wenn es vorerst unter Studierenden bleibt (siehe auch <b>Hinweis &amp; Haftungsausschluss</b> unten).</p>
+ </div>
+</details>
+<div class="cta-line">Wähle unten dein Semester.</div>
 <div class="grid"><a class="sem ready" href="semester-1.html"><div class="semhd"><span class="semno">Semester 1</span><span class="st ready">Verfügbar</span></div><div class="mods"><span class="mod"><b>M02</b> · Bausteine des Lebens / Biochemie</span><span class="mod"><b>M03</b> · Zellbiologie, Mikrobiologie &amp; Stoffwechsel</span><span class="mod"><b>M04</b> · Physiologie, Signalübertragung &amp; Endokrinologie</span></div><div class="cta">Zum Klausurtrainer →</div></a><div class="sem soon"><div class="semhd"><span class="semno">Semester 2</span><span class="st soon">in Vorbereitung</span></div><div class="mods"><span class="mod"><b>M05</b> · Histologie &amp; Embryologie</span><span class="mod"><b>M06</b> · Gesundheitssystem &amp; Prävention</span><span class="mod"><b>M07</b> · Wissenschaftliches Arbeiten</span><span class="mod"><b>M08</b> · Blut- &amp; Immunsystem</span></div><div class="cta soon">Kommt bald</div></div><div class="sem soon"><div class="semhd"><span class="semno">Semester 3</span><span class="st soon">in Vorbereitung</span></div><div class="mods"><span class="mod"><b>M09</b> · Haut &amp; Dermatologie</span><span class="mod"><b>M10</b> · Bewegungsapparat</span><span class="mod"><b>M11</b> · Herz-Kreislauf-System</span><span class="mod"><b>M12</b> · Verdauung &amp; Ernährung</span></div><div class="cta soon">Kommt bald</div></div><div class="sem soon"><div class="semhd"><span class="semno">Semester 4</span><span class="st soon">in Vorbereitung</span></div><div class="mods"><span class="mod"><b>M13</b> · Atmung &amp; Lunge</span><span class="mod"><b>M14</b> · Niere &amp; Elektrolyte</span><span class="mod"><b>M15</b> · Nervensystem</span><span class="mod"><b>M16</b> · Sinnesorgane</span></div><div class="cta soon">Kommt bald</div></div><div class="sem soon"><div class="semhd"><span class="semno">Semester 5</span><span class="st soon">in Vorbereitung</span></div><div class="mods"><span class="mod"><b>M17</b> · Systemische Störungen</span><span class="mod"><b>M18</b> · Infektion als Krankheitsmodell</span><span class="mod"><b>M19</b> · Onkologie &amp; Hämatologie</span><span class="mod"><b>M20</b> · Psyche &amp; Schmerz</span></div><div class="cta soon">Kommt bald</div></div><div class="sem soon"><div class="semhd"><span class="semno">Semester 6</span><span class="st soon">in Vorbereitung</span></div><div class="mods"><span class="mod"><b>M21</b> · Notfall- &amp; Schockbehandlung</span><span class="mod"><b>M22</b> · Endokrinologie, Gynäkologie, Urologie</span><span class="mod"><b>M23</b> · Hausarbeit / wiss. Arbeit</span><span class="mod"><b>M24</b> · Wahlpflichtmodul I</span></div><div class="cta soon">Kommt bald</div></div><div class="sem soon"><div class="semhd"><span class="semno">Semester 7</span><span class="st soon">in Vorbereitung</span></div><div class="mods"><span class="mod"><b>M25</b> · Erkrankungen des Thorax</span><span class="mod"><b>M26</b> · Erkrankungen des Abdomens</span><span class="mod"><b>M27</b> · Erkrankungen der Extremitäten</span><span class="mod"><b>M28</b> · Wahlpflichtmodul II</span></div><div class="cta soon">Kommt bald</div></div><div class="sem soon"><div class="semhd"><span class="semno">Semester 8</span><span class="st soon">in Vorbereitung</span></div><div class="mods"><span class="mod"><b>M29</b> · Kopf, Hals &amp; endokrines System</span><span class="mod"><b>M30</b> · Neurologische Erkrankungen</span><span class="mod"><b>M31</b> · Psychiatrie &amp; Psychosomatik</span><span class="mod"><b>M32</b> · Wahlpflichtmodul III</span></div><div class="cta soon">Kommt bald</div></div><div class="sem soon"><div class="semhd"><span class="semno">Semester 9</span><span class="st soon">in Vorbereitung</span></div><div class="mods"><span class="mod"><b>M33</b> · Geburtshilfe</span><span class="mod"><b>M34</b> · Pädiatrie</span><span class="mod"><b>M35</b> · Geschlechtsspez. Erkrankungen</span><span class="mod"><b>M36</b> · Intensiv-, Palliativ- &amp; Rechtsmedizin</span><span class="mod"><b>M37</b> · Wiss. Arbeiten (Vertiefung)</span></div><div class="cta soon">Kommt bald</div></div><div class="sem soon"><div class="semhd"><span class="semno">Semester 10</span><span class="st soon">in Vorbereitung</span></div><div class="mods"><span class="mod"><b>M38</b> · Notfallmedizin &amp; Hausarztpraxis</span><span class="mod"><b>M39</b> · Blockpraktika</span><span class="mod"><b>M40</b> · Repetitorien &amp; Staatsexamen (M2)</span></div><div class="cta soon">Kommt bald</div></div></div>
 <div class="note">
-<b>Hinweis &amp; Haftungsausschluss.</b> Kreuzzug ist ein inoffizielles, privates Lernprojekt.
+<b>Hinweis &amp; Haftungsausschluss.</b> Casomorphin ist ein inoffizielles, privates Lernprojekt.
 Die Fragen orientieren sich an den Lernzielen des jeweiligen Semesters und könnten so oder in ähnlicher Form
 in Klausuren vorkommen – es sind keine offiziellen Prüfungsfragen. Es besteht keine Verbindung zu einer
 Universität, Fakultät oder Fachschaft. Es wird keine Gewähr für Richtigkeit, Vollständigkeit oder Aktualität

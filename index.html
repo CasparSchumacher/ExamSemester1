@@ -1,6 +1,70 @@
-<!DOCTYPE html><meta charset="utf-8">
-<meta name="robots" content="noindex,nofollow">
-<meta http-equiv="refresh" content="0; url=https://kreuzzug.pages.dev/">
-<title>Umgezogen</title>
-<p>Diese Seite ist umgezogen → <a href="https://kreuzzug.pages.dev/">kreuzzug.pages.dev</a></p>
-<script>location.replace('https://kreuzzug.pages.dev/');</script>
+<!DOCTYPE html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow">
+<title>Casomorphin</title>
+<script>try{if(localStorage.getItem('kz_pilger'))location.replace('start.html');}catch(e){}</script>
+<style>
+:root{--ink:#1f2430;--mut:#6b7280;--line:#e5e7eb;--bg:#f4f5f7;--amber:#b5641a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);line-height:1.65}
+.page{max-width:680px;margin:40px auto;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 2px 14px rgba(0,0,0,.05);padding:26px 30px 30px}
+.crumb{font-size:12px;color:var(--mut);margin-bottom:12px}
+h1{font-size:30px;margin:2px 0 2px;font-weight:800;letter-spacing:-.01em}
+.sub{color:var(--mut);font-size:13px;border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:16px}
+p{font-size:16px;margin:0 0 13px}
+.key{color:inherit;border-radius:3px;transition:color .2s,text-shadow .2s,background .2s;animation:keyhint 1.6s ease-in-out .9s 4}
+.key.blink{animation:keyhint 1.6s ease-in-out 1}
+.key.lit{color:var(--amber)!important;font-weight:700;text-shadow:0 0 7px rgba(181,100,26,.45)!important}
+.key::selection{background:#f3b53f;color:#231a06}
+.key.lit::selection{background:#f3b53f;color:#231a06}
+@keyframes keyhint{0%,100%{color:inherit;text-shadow:none}50%{color:rgba(181,100,26,.5);text-shadow:0 0 5px rgba(181,100,26,.28)}}
+@media(prefers-reduced-motion:reduce){.key,.key.blink{animation:none}}
+.cite{font-size:11px;color:#9aa3ad;vertical-align:super}
+.gate{margin-top:20px;background:#faf6ec;border:1px solid #ecdca6;border-radius:11px;padding:16px 18px}
+.gate label{font-size:14px;font-weight:600;display:block;margin-bottom:8px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+input{font-size:16px;padding:10px 13px;border:1px solid #cdbb92;border-radius:9px;background:#fff;flex:1 1 200px;min-width:160px}
+input:focus{outline:none;border-color:var(--amber);box-shadow:0 0 0 3px rgba(181,100,26,.14)}
+button{font-size:15px;font-weight:700;padding:10px 18px;border:none;border-radius:9px;background:var(--amber);color:#fff;cursor:pointer}
+button:hover{filter:brightness(1.05)}
+.msg{min-height:20px;color:var(--amber);font-weight:700;margin-top:10px;font-size:14px}
+.foot{text-align:center;color:#9aa3ad;font-size:11px;margin-top:16px}
+</style></head><body>
+<div class="page">
+<div class="crumb">Lexikon &rsaquo; Biochemie &rsaquo; Milchpeptide &rsaquo; Casomorphin</div>
+<h1>Casomorphin</h1>
+<div class="sub">Opioidpeptid &middot; ein kurzer Überblick</div>
+<p><b>Casomorphine</b> sind Opioidpeptide, die beim enzymatischen Abbau des Milcheiweißes <i>Casein</i> entstehen.
+<span class="key">V</span>erschiedene Arbeiten zählen sie zu den sogenannten Exorphinen; <span class="key">i</span>m
+Verdauungstrakt werden sie freigesetzt und binden an <span class="key">R</span>ezeptoren vom µ-Typ – dieselben, an
+denen auch klassische Opiate ansetzen.</p>
+<p>Weil lang gereifter <span class="key">C</span>heddar besonders viel Casein enthält, gilt er als ergiebige Quelle.
+Der dabei berichtete <span class="key">H</span>eißhunger wird im Volksmund gern als „Käsesucht" bezeichnet; die
+zugrunde liegende <span class="key">O</span>pioidwirkung gilt jedoch als mild.</p>
+<p>Die <span class="key">W</span>irkung war einer Quelle<span class="cite">[Quelle fehlt]</span> zufolge noch
+<span class="key">24</span>&nbsp;Stunden nach dem Verzehr nachweisbar.</p>
+<div class="gate">
+ <label for="parole">Losungswort eingeben, um fortzufahren:</label>
+ <div class="row"><input id="parole" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Losungswort"><button id="open">Eintreten</button></div>
+ <div class="msg" id="msg"></div>
+</div>
+<div class="foot">Zuletzt geändert: vor dem Mittagessen &middot; Quellenlage: dürftig</div>
+</div>
+<script>
+function norm(s){return (s||'').toLowerCase().replace(/é/g,'e').replace(/[^a-z0-9]/g,'');}
+function tryOpen(){
+  var v=norm(document.getElementById('parole').value), msg=document.getElementById('msg');
+  if(v==='virchow24'){ msg.textContent='Richtig. Du wirst weitergeleitet …';
+    try{localStorage.setItem('kz_pilger','1');}catch(e){}
+    setTimeout(function(){location.href='start.html';},700);
+  } else if(v.length){ msg.textContent='Leider falsch.'; }
+}
+document.getElementById('open').addEventListener('click',tryOpen);
+document.getElementById('parole').addEventListener('keydown',function(e){if(e.key==='Enter')tryOpen();});
+// Wer mit der Maus über die richtigen Stellen fährt, lässt sie aufleuchten – und sie bleiben an.
+Array.prototype.forEach.call(document.querySelectorAll('.key'),function(k){k.addEventListener('mouseenter',function(){k.classList.add('lit');});});
+// Nach 15 s noch einmal kurz aufblinken – aber nur, wenn bis dahin nichts aufgedeckt wurde.
+setTimeout(function(){ if(document.querySelector('.key.lit'))return;
+  Array.prototype.forEach.call(document.querySelectorAll('.key'),function(k){k.classList.add('blink');});
+},15000);
+</script>
+</body></html>
