@@ -1179,9 +1179,14 @@ updMarkCount(); showView('lernen');
   var bc=document.getElementById('bcrumb'), app=document.getElementById('app'), navEl=document.querySelector('.navbar');
   if(!bc||!app||!navEl) return;
   var modNames={M02:"Bausteine",M03:"Zellbiologie",M04:"Physiologie"};
-  // Veranstaltung pro Frage-ID — direkt aus dem Daten-Modul der App (window.S1)
-  var qVer={};
-  try{ if(window.S1&&window.S1.questions) window.S1.questions.forEach(function(q){ qVer[q.id]=q.ver||''; }); }catch(e){}
+  // Veranstaltung pro Frage-ID UND pro Lernziel-ID — direkt aus window.S1
+  var qVer={}, lzVer={};
+  try{
+    if(window.S1&&window.S1.questions) window.S1.questions.forEach(function(q){ qVer[q.id]=q.ver||''; });
+    if(window.S1&&window.S1.lernziele) window.S1.lernziele.forEach(function(l){ lzVer[l.id]=l.ver||''; });
+  }catch(e){}
+  // Selektor: deckt Fragen-Karten UND Lernziel-Zeilen ab
+  var ITEM_SEL='.card[data-mod][data-mw][data-lz][data-id], .lzrow[data-mod][data-mw][data-lz]';
   function modCol(m){ return (getComputedStyle(document.documentElement).getPropertyValue('--'+(m||'').toLowerCase())||'').trim()||'#666'; }
   // Dynamische Navbar-Höhe → --nav-h
   function syncNavH(){ var h=Math.round(navEl.getBoundingClientRect().height); document.documentElement.style.setProperty('--nav-h', h+'px'); }
@@ -1202,21 +1207,23 @@ updMarkCount(); showView('lernen');
     var y=t.getBoundingClientRect().top+window.scrollY-navH-40;
     window.scrollTo({top:y, behavior:'smooth'});
   }
-  function render(card){
-    var mod=card.dataset.mod, mw=card.dataset.mw, lz=card.dataset.lz, qid=card.dataset.id;
-    if(!mod||!mw||!lz||!qid){ bc.classList.remove('show'); return; }
+  function render(el){
+    var mod=el.dataset.mod, mw=el.dataset.mw, lz=el.dataset.lz;
+    if(!mod||!mw||!lz){ bc.classList.remove('show'); return; }
     var col=modCol(mod);
+    // LZ-Sprungziel: Karte ODER Lernziel-Zeile, je nachdem was im DOM ist
+    var lzTarget='.card[data-lz="'+lz+'"], .lzrow[data-lz="'+lz+'"]';
     bc.innerHTML='';
     bc.appendChild(crumb('','Sem 1',null));
     bc.appendChild(sep());
-    bc.appendChild(crumb('mod',null,function(){ scrollToSel('.mod-section[data-mod="'+mod+'"]'); },
+    bc.appendChild(crumb('mod',null,function(){ scrollToSel('.mod-section[data-mod="'+mod+'"], .grp-mod'); },
       '<span class="bc-dot" style="background:'+col+'"></span>'+mod+(modNames[mod]?(' · '+modNames[mod]):'')));
     bc.appendChild(sep());
     bc.appendChild(crumb('mw',mw,function(){ scrollToSel('.mw-group[data-mod="'+mod+'"][data-mw="'+mw+'"]'); }));
     bc.appendChild(sep());
-    bc.appendChild(crumb('lz',null,function(){ scrollToSel('.card[data-lz="'+lz+'"]'); },
+    bc.appendChild(crumb('lz',null,function(){ scrollToSel(lzTarget); },
       '<span class="bc-id">'+lz+'</span>'));
-    var ver=qVer[qid];
+    var ver=lzVer[lz]||qVer[el.dataset.id||'']||'';
     if(ver){
       bc.appendChild(sep());
       var vEl=document.createElement('span');
@@ -1229,7 +1236,7 @@ updMarkCount(); showView('lernen');
     var navH=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h'))||66;
     var bandTop=navH+8, bandBot=Math.max(window.innerHeight*0.7, bandTop+260);
     var topY=Infinity, top=null, fallback=null, fbDist=Infinity;
-    app.querySelectorAll('.card[data-mod][data-mw][data-lz][data-id]').forEach(function(c){
+    app.querySelectorAll(ITEM_SEL).forEach(function(c){
       if(c.offsetParent===null) return; // display:none / unsichtbar
       var r=c.getBoundingClientRect();
       // im Band → bevorzugt
@@ -1244,7 +1251,7 @@ updMarkCount(); showView('lernen');
   function schedule(){ if(raf) return; raf=requestAnimationFrame(function(){ raf=0; pickTop(); }); }
   function setupIO(){
     if(io){ io.disconnect(); io=null; }
-    var cards=app.querySelectorAll('.card[data-mod][data-mw][data-lz][data-id]');
+    var cards=app.querySelectorAll(ITEM_SEL);
     if(!cards.length){ bc.classList.remove('show'); bc.innerHTML=''; cur=null; return; }
     // Erst-Auswertung per Bounding-Box (IO feuert nicht spontan bei Display-Toggles)
     pickTop();
