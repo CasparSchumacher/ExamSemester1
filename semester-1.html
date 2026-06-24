@@ -329,6 +329,26 @@ body.dark .navbar{ background:color-mix(in oklab, var(--bg) 78%, transparent); }
 /* Markenzeile & Logo */
 .topbar{ font-family:var(--font-ui); letter-spacing:.06em; }
 .logo{ width:300px; }
+
+/* 5-Ebenen-Breadcrumb (sticky unter navbar) */
+:root{ --nav-h:66px; }
+.bcrumb{ position:sticky; top:var(--nav-h); z-index:29; display:none; align-items:center; gap:4px;
+  font-size:12.5px; color:var(--mut); padding:9px 2px; border-bottom:1px solid var(--line);
+  background:color-mix(in oklab, var(--bg) 80%, transparent);
+  -webkit-backdrop-filter:saturate(1.4) blur(10px); backdrop-filter:saturate(1.4) blur(10px);
+  overflow-x:auto; white-space:nowrap; scrollbar-width:none; }
+.bcrumb::-webkit-scrollbar{ display:none }
+.bcrumb.show{ display:flex }
+.bcrumb .bc{ display:inline-flex; align-items:center; cursor:pointer; color:var(--mut);
+  text-decoration:none; padding:3px 9px; border-radius:7px; transition:background .12s var(--ease),color .12s var(--ease); }
+.bcrumb .bc:hover{ background:var(--surface-2); color:var(--ink) }
+.bcrumb .bc.mod{ color:var(--ink); font-weight:600 }
+.bcrumb .bc.last{ color:var(--ink); font-weight:600; cursor:default; background:transparent }
+.bcrumb .bc.last:hover{ background:transparent }
+.bcrumb .bc-sep{ color:var(--line-strong); padding:0 1px; font-size:12px; user-select:none }
+.bcrumb .bc-dot{ width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:6px }
+.bcrumb .bc-id{ font-feature-settings:"tnum" 1; font-variant-numeric:tabular-nums; letter-spacing:.015em }
+@media(max-width:600px){ .bcrumb{ font-size:11.5px; padding:7px 2px } .bcrumb .bc{ padding:3px 7px } }
 </style></head><body class="mode-klausur">
 <script>try{if(localStorage.kz_theme==='dark'||(localStorage.kz_theme==null&&matchMedia('(prefers-color-scheme:dark)').matches))document.body.classList.add('dark');if(localStorage.kz_game==='1')document.body.classList.add('gamify');}catch(e){}</script>
 <div class="topbar">Stay Cheesy! 🧀</div>
@@ -349,6 +369,7 @@ body.dark .navbar{ background:color-mix(in oklab, var(--bg) 78%, transparent); }
  </div>
  <div class="seg gameseg"><button class="tab gametab" data-view="game">🧀 Reifekeller</button></div>
 </nav>
+<div id="bcrumb" class="bcrumb" aria-label="Aktuelle Position"></div>
 <div id="hud" class="hud"></div>
 <main id="app"></main>
 </div><div id="lb"><img alt=""></div>
@@ -1008,6 +1029,94 @@ var toTop=document.getElementById('toTop');
 window.addEventListener('scroll',function(){ if(window.scrollY>400)toTop.classList.add('show'); else toTop.classList.remove('show'); });
 toTop.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
 updMarkCount(); showView('lernen');
+})();
+</script>
+<script>
+/* === 5-Ebenen-Breadcrumb (Semester › Modul › MW › Lernziel › Frage) ============
+   Read-only Add-on: liest .card-data, ruft KEINE internen Funktionen auf.
+   ============================================================================ */
+(function(){
+  var bc=document.getElementById('bcrumb'), app=document.getElementById('app'), navEl=document.querySelector('.navbar');
+  if(!bc||!app||!navEl) return;
+  var modNames={M02:"Bausteine",M03:"Zellbiologie",M04:"Physiologie"};
+  function modCol(m){ return (getComputedStyle(document.documentElement).getPropertyValue('--'+(m||'').toLowerCase())||'').trim()||'#666'; }
+  // Dynamische Navbar-Höhe → --nav-h
+  function syncNavH(){ var h=Math.round(navEl.getBoundingClientRect().height); document.documentElement.style.setProperty('--nav-h', h+'px'); }
+  syncNavH();
+  if(window.ResizeObserver) new ResizeObserver(syncNavH).observe(navEl); else window.addEventListener('resize',syncNavH);
+
+  var io=null, cur=null, raf=0;
+  function sep(){ var s=document.createElement('span'); s.className='bc-sep'; s.textContent='›'; return s; }
+  function crumb(cls,text,onClick,extraHtml){
+    var el=document.createElement('span'); el.className='bc'+(cls?' '+cls:'');
+    if(extraHtml) el.innerHTML=extraHtml; else el.textContent=text;
+    if(onClick) el.addEventListener('click',onClick); else el.classList.add('last');
+    return el;
+  }
+  function scrollToSel(sel){
+    var t=document.querySelector(sel); if(!t) return;
+    var navH=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h'))||66;
+    var y=t.getBoundingClientRect().top+window.scrollY-navH-40;
+    window.scrollTo({top:y, behavior:'smooth'});
+  }
+  function render(card){
+    var mod=card.dataset.mod, mw=card.dataset.mw, lz=card.dataset.lz, qid=card.dataset.id;
+    if(!mod||!mw||!lz||!qid){ bc.classList.remove('show'); return; }
+    var col=modCol(mod);
+    bc.innerHTML='';
+    bc.appendChild(crumb('','Sem 1',null));
+    bc.appendChild(sep());
+    bc.appendChild(crumb('mod',null,function(){ scrollToSel('.mod-section[data-mod="'+mod+'"]'); },
+      '<span class="bc-dot" style="background:'+col+'"></span>'+mod+(modNames[mod]?(' · '+modNames[mod]):'')));
+    bc.appendChild(sep());
+    bc.appendChild(crumb('mw',mw,function(){ scrollToSel('.mw-group[data-mod="'+mod+'"][data-mw="'+mw+'"]'); }));
+    bc.appendChild(sep());
+    bc.appendChild(crumb('lz',null,function(){ scrollToSel('.card[data-lz="'+lz+'"]'); },
+      '<span class="bc-id">'+lz+'</span>'));
+    bc.appendChild(sep());
+    bc.appendChild(crumb('last',null,null,'<span class="bc-id">'+qid+'</span>'));
+    bc.classList.add('show');
+  }
+  function pickTop(){
+    var navH=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h'))||66;
+    var bandTop=navH+8, bandBot=Math.max(window.innerHeight*0.7, bandTop+260);
+    var topY=Infinity, top=null, fallback=null, fbDist=Infinity;
+    app.querySelectorAll('.card[data-mod][data-mw][data-lz][data-id]').forEach(function(c){
+      if(c.offsetParent===null) return; // display:none / unsichtbar
+      var r=c.getBoundingClientRect();
+      // im Band → bevorzugt
+      if(r.bottom>=bandTop && r.top<=bandBot){ if(r.top<topY){ topY=r.top; top=c; } return; }
+      // Fallback: nächste card unter dem Band (für direkt nach scrollIntoView)
+      if(r.top>bandBot && r.top<window.innerHeight){ var d=r.top-bandBot; if(d<fbDist){ fbDist=d; fallback=c; } }
+    });
+    var pick=top||fallback;
+    if(pick){ if(pick!==cur){ cur=pick; render(pick); } }
+    else { cur=null; bc.classList.remove('show'); bc.innerHTML=''; }
+  }
+  function schedule(){ if(raf) return; raf=requestAnimationFrame(function(){ raf=0; pickTop(); }); }
+  function setupIO(){
+    if(io){ io.disconnect(); io=null; }
+    var cards=app.querySelectorAll('.card[data-mod][data-mw][data-lz][data-id]');
+    if(!cards.length){ bc.classList.remove('show'); bc.innerHTML=''; cur=null; return; }
+    // Erst-Auswertung per Bounding-Box (IO feuert nicht spontan bei Display-Toggles)
+    pickTop();
+    io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){ e.target._intersecting=e.isIntersecting; });
+      schedule();
+    }, { threshold:0 });
+    cards.forEach(function(c){ io.observe(c); });
+  }
+  // Bei jedem View-Wechsel rendert showView() #app neu → IO neu aufsetzen
+  var mo=new MutationObserver(function(){ setTimeout(setupIO, 30); });
+  mo.observe(app, {childList:true, subtree:false});
+  // Filter-/Tab-Klicks lösen kein DOM-Replace aus, nur display-Toggles → manuell triggern
+  document.addEventListener('click', function(e){
+    if(e.target.closest('.modbtn,.mwbtn,.subtab,.tab')) setTimeout(pickTop, 60);
+  });
+  // Scroll-/Resize-Spy als Sicherheitsnetz
+  window.addEventListener('scroll', schedule, {passive:true});
+  window.addEventListener('resize', schedule);
+  setupIO();
 })();
 </script>
 </body></html>
