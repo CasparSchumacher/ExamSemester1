@@ -433,6 +433,18 @@ body.dark .ver-head.done{ color:#83e0a3 }
 .mw-row .mw-head{ margin:0; border:1.5px solid transparent }
 .skriptbtn{ display:inline-flex; align-items:center; margin:0; padding:6px 14px; border:1.5px solid var(--mc,#2563eb); color:var(--mc,#2563eb); background:var(--surface); border-radius:999px; font-size:12px; font-weight:700; text-decoration:none; transition:box-shadow .15s var(--ease),background .15s var(--ease) }
 .skriptbtn:hover{ box-shadow:var(--sh-1); background:color-mix(in oklab,var(--mc,#2563eb) 9%, var(--surface)) }
+.mw-theme{ text-transform:none; font-weight:600 }
+/* Lernen: Abhaken-Färbung */
+.lzacc.done{ background:color-mix(in oklab,#16a34a 6%, var(--surface)) }
+body.dark .lzacc.done{ background:color-mix(in oklab,#16a34a 13%, var(--surface)) }
+.lz-count.lz-done{ color:#15803d; font-weight:800 }
+body.dark .lz-count.lz-done{ color:#83e0a3 }
+.ls-vh{ scroll-margin-top:66px }
+.ls-vh.done{ color:#15803d }
+body.dark .ls-vh.done{ color:#83e0a3 }
+.ls-vh .ver-check{ color:#16a34a; font-weight:800 }
+.mw-fertig{ display:inline-block; color:#15803d; font-weight:800; background:#dcfce7; border-radius:20px; padding:1px 9px; font-size:11px; text-transform:none; letter-spacing:0 }
+body.dark .mw-fertig{ background:#16331f; color:#83e0a3 }
 
 /* ⌘K Befehlspalette */
 .cmdk-overlay{ position:fixed; inset:0; background:rgba(20,16,12,.42); -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px);
@@ -960,14 +972,12 @@ function markCardDone(card,st){ if(!card)return; card.classList.remove('done-ok'
 function markDoneCards(root){ (root||app).querySelectorAll('.card[data-id]').forEach(function(c){ var st=prog[c.dataset.id]; if(st!=null) markCardDone(c,st); }); }
 function renderLernen(){
   var h='<div class="toolbar">'+chipRow()
-   +'<div class="lnrow2"><div class="subseg"><button class="subtab'+(LN.sub==='lernziele'?' active':'')+'" data-sub="lernziele">Lernziele</button><button class="subtab'+(LN.sub==='fragen'?' active':'')+'" data-sub="fragen">Fragen</button></div>'
-   +'<input class="search" id="lns" placeholder="Suchen (Frage, Antwort, Stichwort, Lernziel …)"></div>'
+   +'<div class="lnrow2"><input class="search" id="lns" placeholder="Suchen (Frage, Antwort, Stichwort, Lernziel …)"></div>'
    +'<div class="sub lnhint" id="lnhint"></div></div>';
-  h+='<div id="ln-lz">'+lzRowsHtml()+'</div><div id="ln-fr">'+renderGrouped(Q)+'</div>';
+  h+='<div id="ln-fr">'+renderGrouped(Q)+'</div>';
   app.innerHTML=h;
   app.querySelectorAll('.modbtn').forEach(function(b){b.addEventListener('click',function(){LN.mod=b.dataset.mod;app.querySelectorAll('.modbtn').forEach(function(x){x.classList.toggle('active',x===b);});lnApply();});});
   app.querySelectorAll('.mwbtn').forEach(function(b){b.addEventListener('click',function(){LN.mw=b.dataset.mw;app.querySelectorAll('.mwbtn').forEach(function(x){x.classList.toggle('active',x===b);});lnApply();});});
-  app.querySelectorAll('.subtab').forEach(function(b){b.addEventListener('click',function(){LN.sub=b.dataset.sub;app.querySelectorAll('.subtab').forEach(function(x){x.classList.toggle('active',x===b);});lnApply();});});
   document.getElementById('lns').addEventListener('input',lnApply);
   lnApply();
   markDoneCards(app);
@@ -983,37 +993,21 @@ function lnHeaders(box){ var kids=box.children,i,j;
 }
 function lnApply(){
   var t=(document.getElementById('lns').value||'').trim().toLowerCase();
-  var mod=LN.mod,mw=LN.mw, lz=document.getElementById('ln-lz'), fr=document.getElementById('ln-fr');
-  var isLz=LN.sub==='lernziele';
-  lz.style.display=isLz?'':'none'; fr.style.display=isLz?'none':'';
-  var hint=document.getElementById('lnhint');
-  if(isLz){
-    var nv=0;
-    lz.querySelectorAll('.lzrow').forEach(function(r){var ok=(mod==='all'||r.dataset.mod===mod)&&(mw==='all'||r.dataset.mw===mw)&&(!t||r.dataset.s.indexOf(t)>=0);r.style.display=ok?'':'none';if(ok&&!r.classList.contains('empty'))nv++;});
-    var lk=lz.children;
-    for(var a=0;a<lk.length;a++){ var el=lk[a]; if(!el.classList||!el.classList.contains('ver-head'))continue;
-      var vv=false; for(var b=a+1;b<lk.length;b++){ var n=lk[b]; if(n.classList.contains('ver-head')||n.classList.contains('grp-mw')||n.classList.contains('grp-mod'))break; if(n.classList.contains('lzrow')&&n.style.display!=='none'){vv=true;break;} }
-      el.style.display=vv?'':'none'; }
-    lz.querySelectorAll('.ver-dd').forEach(function(dd){ dd.style.display=(mw!=='all'&&(mod==='all'||dd.dataset.mod===mod)&&dd.dataset.mw===mw)?'':'none'; });
-    lz.querySelectorAll('.ver-item').forEach(function(it){ var tg=document.getElementById(it.dataset.target); it.style.display=(tg&&tg.style.display!=='none')?'':'none'; });
-    lnHeaders(lz);
-    if(hint)hint.textContent='Tippe auf ein Lernziel, um die zugehörigen Fragen zu öffnen. ('+nv+' mit Fragen)';
-  } else {
-    fr.querySelectorAll('.lz').forEach(function(b){var okm=(mod==='all'||b.dataset.mod===mod)&&(mw==='all'||b.dataset.mw===mw),any=false;
-      b.querySelectorAll('.card').forEach(function(c){var ok=okm&&(!t||c.dataset.s.indexOf(t)>=0);c.style.display=ok?'':'none';if(ok)any=true;});
-      b.style.display=(okm&&any)?'':'none';});
-    // Veranstaltungs-Zwischenüberschriften ein-/ausblenden (sichtbar, wenn darunter noch eine Frage-Box steht)
-    fr.querySelectorAll('.mw-group').forEach(function(g){ var kids=g.children;
-      for(var i=0;i<kids.length;i++){ var el=kids[i]; if(!el.classList||!el.classList.contains('ver-head'))continue;
-        var vis=false; for(var j=i+1;j<kids.length;j++){ var n=kids[j]; if(n.classList.contains('ver-head'))break; if(n.classList.contains('lz')&&n.style.display!=='none'){vis=true;break;} }
-        el.style.display=vis?'':'none'; } });
-    // Sprung-Dropdown nur bei gewählter Modulwoche; Einträge zu ausgeblendeten Einheiten ausblenden
-    fr.querySelectorAll('.ver-dd').forEach(function(dd){ dd.style.display=(mw!=='all'&&(mod==='all'||dd.dataset.mod===mod)&&dd.dataset.mw===mw)?'':'none'; });
-    fr.querySelectorAll('.ver-item').forEach(function(it){ var tg=document.getElementById(it.dataset.target); it.style.display=(tg&&tg.style.display!=='none')?'':'none'; });
-    fr.querySelectorAll('.mw-group').forEach(function(g){g.style.display=[].slice.call(g.querySelectorAll('.lz')).some(function(l){return l.style.display!=='none';})?'':'none';});
-    fr.querySelectorAll('.mod-section').forEach(function(s){s.style.display=[].slice.call(s.querySelectorAll('.mw-group')).some(function(g){return g.style.display!=='none';})?'':'none';});
-    if(hint)hint.textContent='';
-  }
+  var mod=LN.mod,mw=LN.mw, fr=document.getElementById('ln-fr'); if(!fr)return;
+  fr.querySelectorAll('.lz').forEach(function(b){var okm=(mod==='all'||b.dataset.mod===mod)&&(mw==='all'||b.dataset.mw===mw),any=false;
+    b.querySelectorAll('.card').forEach(function(c){var ok=okm&&(!t||c.dataset.s.indexOf(t)>=0);c.style.display=ok?'':'none';if(ok)any=true;});
+    b.style.display=(okm&&any)?'':'none';});
+  // Veranstaltungs-Zwischenüberschriften ein-/ausblenden (sichtbar, wenn darunter noch eine Frage-Box steht)
+  fr.querySelectorAll('.mw-group').forEach(function(g){ var kids=g.children;
+    for(var i=0;i<kids.length;i++){ var el=kids[i]; if(!el.classList||!el.classList.contains('ver-head'))continue;
+      var vis=false; for(var j=i+1;j<kids.length;j++){ var n=kids[j]; if(n.classList.contains('ver-head'))break; if(n.classList.contains('lz')&&n.style.display!=='none'){vis=true;break;} }
+      el.style.display=vis?'':'none'; } });
+  // Sprung-Dropdown nur bei gewählter Modulwoche; Einträge zu ausgeblendeten Einheiten ausblenden
+  fr.querySelectorAll('.ver-dd').forEach(function(dd){ dd.style.display=(mw!=='all'&&(mod==='all'||dd.dataset.mod===mod)&&dd.dataset.mw===mw)?'':'none'; });
+  fr.querySelectorAll('.ver-item').forEach(function(it){ var tg=document.getElementById(it.dataset.target); it.style.display=(tg&&tg.style.display!=='none')?'':'none'; });
+  fr.querySelectorAll('.mw-group').forEach(function(g){g.style.display=[].slice.call(g.querySelectorAll('.lz')).some(function(l){return l.style.display!=='none';})?'':'none';});
+  fr.querySelectorAll('.mod-section').forEach(function(s){s.style.display=[].slice.call(s.querySelectorAll('.mw-group')).some(function(g){return g.style.display!=='none';})?'':'none';});
+  var hint=document.getElementById('lnhint'); if(hint)hint.textContent='';
 }
 function renderLzDetail(lid){
   ST.view='lernen'; setTab('lernen');
@@ -1031,7 +1025,7 @@ function renderLzDetail(lid){
     });
   }
   h+='</div>';
-  app.innerHTML=h; markDoneCards(app); document.getElementById('backlz').addEventListener('click',function(){LN.sub='lernziele';showView('lernen');});
+  app.innerHTML=h; markDoneCards(app); document.getElementById('backlz').addEventListener('click',function(){showView('lernen');});
 }
 
 function renderMarkiert(){
@@ -1125,9 +1119,9 @@ function renderSummary(){
 
 function renderHilfe(){
   var h='<div class="help"><h3>So funktioniert '+esc(NAME)+'</h3>'
-   +'<ul><li><b>Üben:</b> wähle oben <b>Modul</b> und <b>Modulwoche</b> und schalte dann zwischen zwei Ansichten um: <b>Lernziele</b> (Überblick je Lernziel; Tippen öffnet die zugehörigen Fragen) und <b>Fragen</b> (alle Fragen der Auswahl direkt zum Beantworten). Suche durchsucht beide.</li>'
+   +'<ul><li><b>Üben:</b> wähle oben <b>Modul</b> und <b>Modulwoche</b> – alle Fragen der Auswahl erscheinen direkt zum Beantworten, gruppiert nach Lernziel. Bereits beantwortete Fragen werden mit ✓ (richtig) / ✗ (falsch) markiert. Die Suche durchsucht Frage, Antwort und Stichworte.</li>'
    +'<li><b>Quizzen:</b> Module/Modulwochen wählen, Anzahl (10/20/40/alle/eigene) → zufälliges Set, eine Frage nach der anderen, Auswertung am Ende.</li>'
-   +'<li><b>Lernen:</b> kompaktes Kernwissen je Lernziel und Modulwoche – klausur-zugespitzt aus den Altfragen und dem Modulstoff destilliert (KI, Beta/ohne Gewähr). Zum Vor- und Nachlesen; „→ Fragen dazu" springt direkt ins passende Lernziel. Über „Im ausführlichen Modulskript nachlesen" gelangst du seitengenau in das vollständige Modulskript.</li>'
+   +'<li><b>Lernen:</b> Überblick über <b>alle Lernziele</b> der Modulwoche, nach Lehrveranstaltung geordnet. Tippe ein Lernziel an für die kompakte <b>Kurz-Zusammenfassung</b> (KI, Beta/ohne Gewähr). Bereits durchgearbeitete Lernziele sind grün abgehakt, fragenlose ausgegraut. „→ Altklausurfragen dazu" springt in den Üben-Modus; „Im Modulskript nachlesen" öffnet seitengenau das vollständige Modulskript.</li>'
    +'<li><b>★ Markiert:</b> schwierige Fragen mit „☆ markieren" sammeln (im Browser gespeichert) und gezielt wiederholen.</li>'
    +'<li><b>Käse-Modus (optional):</b> oben über „Käse-Modus" an-/ausschaltbar. Ein verspielter Lern-Layer: dein Käse <b>reift</b> (Level Milch → … → Parmesan), du sammelst <b>Reife</b>, baust eine <b>Reife-Streak</b> auf, schließt den <b>Wochenmarkt</b> ab und sammelst Abzeichen – alles im <b>Reifekeller</b>. Reife gibt es <b>nur für erstmals richtig</b> beantwortete Karten – Durchklicken, Raten oder Wiederholen bringt nichts; die Antwortoptionen werden dabei gemischt. Im Standardmodus bleibt alles nüchtern wie gewohnt.</li>'
    +'<li><b>Klausurmodus:</b> Antwort anklicken → richtig/falsch + Lösung. Bei einer <b>falschen</b> Antwort erscheint automatisch das passende Kernwissen; bei richtiger blendest du es über „ⓘ Kernwissen" ein. <b>PDF:</b> im Browser Drucken → Als PDF sichern.</li></ul>'
@@ -1175,14 +1169,18 @@ function renderLernskript(mod,mw){
   mws.forEach(function(w){ h+='<button class="chip ls-mw'+(w===mw?' active':'')+'" data-mw="'+w+'">'+w+'</button>'; });
   h+='</div></div>';
   h+='<div class="mod-head" style="background:'+col+';margin-top:14px">'+esc(mod+" · "+(MODNAME[mod]||""))+'</div>';
-  var intro=MWI[mod+'|'+mw], lsu=skriptUrl(mod,mw);
+  var intro=MWI[mod+'|'+mw], lsu=skriptUrl(mod,mw), sm=intro?mwBullets(intro):null;
+  var theme=(sm&&sm.title)?sm.title.replace(/^\s*\d+[.\s]*/,'').trim():'';
+  // Fortschritt (bearbeitete Fragen) je Lernziel dieser Woche
+  var totByLz={}, ansByLz={};
+  Q.forEach(function(q){ if(q.mod===mod&&q.mw===mw){ totByLz[q.lz]=(totByLz[q.lz]||0)+1; if(prog[q.id]!=null) ansByLz[q.lz]=(ansByLz[q.lz]||0)+1; } });
+  var themeHtml=theme?' · <span class="mw-theme">'+esc(theme)+'</span>':'';
   h+='<div class="mw-row">';
-  if(intro) h+='<div class="mw-head mw-toggle" style="background:'+col+'">'+mod+' · '+mw+'<span class="mw-cev">▸</span></div>';
-  else h+='<div class="mw-head" style="background:'+col+'">'+mod+' · '+mw+'</div>';
+  if(intro) h+='<div class="mw-head mw-toggle" style="background:'+col+'">'+mod+' · '+mw+themeHtml+'<span class="mw-cev">▸</span></div>';
+  else h+='<div class="mw-head" style="background:'+col+'">'+mod+' · '+mw+themeHtml+'</div>';
   if(lsu) h+='<a class="skriptbtn" href="'+lsu.url+'" target="_blank" rel="noopener" style="--mc:'+col+'">Im Modulskript nachlesen · ab S. '+lsu.page+' ↗</a>';
   h+='</div>';
   if(intro){
-    var sm=mwBullets(intro);
     h+='<div class="mw-summary" style="--mc:'+col+'">';
     if(sm.title) h+='<div class="mw-summary-hd">Themen der Woche · '+esc(sm.title)+'</div>';
     if(sm.bullets.length) h+='<ul class="mw-bullets">'+sm.bullets.map(function(b){return '<li>'+esc(b)+'</li>';}).join('')+'</ul>';
@@ -1191,18 +1189,27 @@ function renderLernskript(mod,mw){
   }
   if(!lzs.length){ h+='<div class="empty-msg">Für diese Modulwoche sind keine Lernziele hinterlegt.</div>'; }
   else {
-    h+='<div class="ls-count-bar">'+lzs.length+' Lernziel'+(lzs.length===1?'':'e')+(nKw?(' · '+nKw+' mit Kurz-Zusammenfassung'):'')+'</div>';
     var verOrder=[], byVer={};
     lzs.forEach(function(l){ var v=l.ver||'—'; if(!byVer[v]){byVer[v]=[];verOrder.push(v);} byVer[v].push(l); });
-    verOrder.forEach(function(v){
-      h+='<div class="ls-vh">'+esc(v)+'</div>';
+    var verDone={}, mwTot=0, mwAns=0;
+    verOrder.forEach(function(v){ var t=0,a=0; byVer[v].forEach(function(l){ t+=totByLz[l.id]||0; a+=ansByLz[l.id]||0; }); verDone[v]=(t>0&&a>=t); mwTot+=t; mwAns+=a; });
+    var mwDone=mwTot>0&&mwAns>=mwTot;
+    h+='<div class="ls-count-bar">'+lzs.length+' Lernziel'+(lzs.length===1?'':'e')+(nKw?(' · '+nKw+' mit Kurz-Zusammenfassung'):'')+(mwDone?' · <span class="mw-fertig">✓ Woche fertig</span>':'')+'</div>';
+    if(verOrder.length>1){
+      h+='<div class="ver-dd"><button class="ver-dd-btn" type="button">Lehrveranstaltung <span class="dd-caret">▾</span></button><div class="ver-menu">'
+        +verOrder.map(function(v,vi){return '<span class="ver-item" data-target="lsv-'+mod+'-'+mw+'-'+vi+'">'+esc(v)+(verDone[v]?' ✓':'')+'</span>';}).join('')+'</div></div>';
+    }
+    verOrder.forEach(function(v,vi){
+      h+='<div class="ls-vh anchor'+(verDone[v]?' done':'')+'" id="lsv-'+mod+'-'+mw+'-'+vi+'">'+esc(v)+(verDone[v]?' <span class="ver-check">✓</span>':'')+'</div>';
       byVer[v].forEach(function(l){
         var hasKw=!!KW[l.id], hasQ=l.n>0, expandable=hasKw||hasQ, open=expandable&&lsOpen[l.id];
-        h+='<div class="lzacc'+(expandable?'':' flat')+(hasQ?'':' dim')+(open?' open':'')+'" data-lz="'+esc(l.id)+'" style="border-left-color:'+col+'">'
+        var t=totByLz[l.id]||0, a=ansByLz[l.id]||0, ldone=(t>0&&a>=t), lpart=(a>0&&a<t);
+        var cnt = !hasQ ? '' : (ldone ? '<span class="lz-count lz-done">✓ '+t+'/'+t+'</span>' : (lpart ? '<span class="lz-count">'+a+'/'+t+'</span>' : '<span class="lz-count">'+t+' Frage'+(t===1?'':'n')+'</span>'));
+        h+='<div class="lzacc'+(expandable?'':' flat')+(hasQ?'':' dim')+(ldone?' done':'')+(open?' open':'')+'" data-lz="'+esc(l.id)+'" style="border-left-color:'+col+'">'
           +'<div class="lzacc-head">'
             +'<span class="lz-id" style="background:'+col+'">'+esc(l.id)+'</span>'
             +'<span class="lzacc-tx">'+esc(l.t)+'</span>'
-            +'<span class="lzacc-meta">'+(hasQ?('<span class="lz-count">'+l.n+' Frage'+(l.n===1?'':'n')+'</span>'):'')
+            +'<span class="lzacc-meta">'+cnt
               +(expandable?'<span class="lzacc-cev">▸</span>':'')+'</span>'
           +'</div>'
           +'<div class="lzacc-body">'
