@@ -380,7 +380,19 @@ body.dark .navbar{ background:color-mix(in oklab, var(--bg) 78%, transparent); }
 .ls-vh{ font-size:11.5px; font-weight:700; color:var(--mut); text-transform:uppercase; letter-spacing:.05em; margin:20px 0 8px; padding:2px 0 2px 11px; border-left:3px solid var(--line) }
 .lzacc{ background:var(--surface); border:1px solid var(--line); border-left-width:4px; border-radius:var(--r-md); margin:8px 0; box-shadow:var(--sh-1); overflow:hidden; transition:box-shadow .15s var(--ease) }
 .lzacc:not(.flat):hover{ box-shadow:var(--sh-2) }
-.lzacc.flat{ opacity:.72 }
+.lzacc.dim{ opacity:.55 }
+.lzacc.dim:not(.flat):hover{ opacity:.8 }
+/* Modulwochen-Zusammenfassung: Toggle übers MW-Pill, Stichpunkte */
+.mw-toggle{ cursor:pointer; -webkit-user-select:none; user-select:none }
+.mw-toggle .mw-cev{ display:inline-block; margin-left:9px; font-size:11px; opacity:.9; transition:transform .2s var(--ease) }
+.mw-toggle.open .mw-cev{ transform:rotate(90deg) }
+.mw-summary{ display:none; margin:11px 0 2px; background:var(--surface); border:1px solid var(--line); border-left:4px solid var(--mc,var(--line)); border-radius:var(--r-lg); box-shadow:var(--sh-1) }
+.mw-summary.open{ display:block; animation:exfade .22s ease-out }
+.mw-summary-hd{ font-weight:700; font-size:13px; color:var(--mut); text-transform:uppercase; letter-spacing:.04em; padding:13px 18px 4px }
+.mw-bullets{ margin:6px 0 4px; padding:4px 20px 15px 36px; list-style:disc }
+.mw-bullets li{ margin:6px 0; font-size:14px; line-height:1.46; color:var(--ink) }
+.mw-bullets li::marker{ color:var(--mc,var(--mut)) }
+@media(min-width:620px){ .mw-bullets{ columns:2; column-gap:34px } .mw-bullets li{ -webkit-column-break-inside:avoid; break-inside:avoid } }
 .lzacc-head{ display:flex; align-items:flex-start; gap:11px; padding:13px 16px; cursor:pointer; -webkit-user-select:none; user-select:none }
 .lzacc.flat .lzacc-head{ cursor:default }
 .lzacc-head .lz-id{ flex:0 0 auto; margin-top:1px }
@@ -1089,6 +1101,18 @@ function renderHilfe(){
 // ---------- Lernskript ----------
 var LSsel={mod:null,mw:null}, lsOpen={};
 function mwsForMod(mod){ var s={}; LZ.forEach(function(l){if(l.mod===mod)s[l.mw]=1;}); return Object.keys(s).sort(); }
+function mwBullets(text){
+  var title='', body=String(text||'').trim();
+  var ci=body.indexOf(':');
+  if(/^modulwoche/i.test(body) && ci>0 && ci<70){ title=body.slice(0,ci).replace(/^\s*modulwoche\s*/i,'').replace(/["„""'»«]/g,'').trim(); body=body.slice(ci+1); }
+  var raw=[], depth=0, cur='';
+  for(var i=0;i<body.length;i++){ var ch=body.charAt(i);
+    if(ch==='(')depth++; else if(ch===')')depth=(depth>0?depth-1:0);
+    if(depth===0 && (ch===','||ch===';')){ raw.push(cur); cur=''; } else cur+=ch; }
+  raw.push(cur);
+  var bl=[]; raw.forEach(function(p){ p.split(/\s+sowie\s+/).forEach(function(q){ q=q.replace(/^\s*(und|bzw\.?)\s+/i,'').replace(/[. \s]+$/,'').trim(); if(q) bl.push(q); }); });
+  return { title:title, bullets:bl };
+}
 function renderLernskript(mod,mw){
   ST.view='lernskript'; setTab('lernskript');
   var mods=MODS.filter(function(m){return LZ.some(function(l){return l.mod===m;});});
@@ -1108,8 +1132,18 @@ function renderLernskript(mod,mw){
   mws.forEach(function(w){ h+='<button class="chip ls-mw'+(w===mw?' active':'')+'" data-mw="'+w+'">'+w+'</button>'; });
   h+='</div></div>';
   h+='<div class="mod-head" style="background:'+col+';margin-top:14px">'+esc(mod+" · "+(MODNAME[mod]||""))+'</div>';
-  h+='<div class="mw-head" style="background:'+col+'">'+mod+' · '+mw+'</div>';
-  var intro=MWI[mod+'|'+mw]; if(intro) h+='<div class="ls-intro">'+esc(intro)+'</div>';
+  var intro=MWI[mod+'|'+mw];
+  if(intro){
+    var sm=mwBullets(intro);
+    h+='<div class="mw-head mw-toggle" style="background:'+col+'">'+mod+' · '+mw+'<span class="mw-cev">▸</span></div>';
+    h+='<div class="mw-summary" style="--mc:'+col+'">';
+    if(sm.title) h+='<div class="mw-summary-hd">Themen der Woche · '+esc(sm.title)+'</div>';
+    if(sm.bullets.length) h+='<ul class="mw-bullets">'+sm.bullets.map(function(b){return '<li>'+esc(b)+'</li>';}).join('')+'</ul>';
+    else h+='<div class="mw-summary-hd" style="padding:13px 18px">'+esc(intro)+'</div>';
+    h+='</div>';
+  } else {
+    h+='<div class="mw-head" style="background:'+col+'">'+mod+' · '+mw+'</div>';
+  }
   var lsu=skriptUrl(mod,mw); if(lsu) h+='<a class="skriptbtn" href="'+lsu.url+'" target="_blank" rel="noopener" style="border-color:'+col+';color:'+col+'">Im ausführlichen Modulskript nachlesen · ab Seite '+lsu.page+' ↗</a>';
   if(!lzs.length){ h+='<div class="empty-msg">Für diese Modulwoche sind keine Lernziele hinterlegt.</div>'; }
   else {
@@ -1120,7 +1154,7 @@ function renderLernskript(mod,mw){
       h+='<div class="ls-vh">'+esc(v)+'</div>';
       byVer[v].forEach(function(l){
         var hasKw=!!KW[l.id], hasQ=l.n>0, expandable=hasKw||hasQ, open=expandable&&lsOpen[l.id];
-        h+='<div class="lzacc'+(expandable?'':' flat')+(open?' open':'')+'" data-lz="'+esc(l.id)+'" style="border-left-color:'+col+'">'
+        h+='<div class="lzacc'+(expandable?'':' flat')+(hasQ?'':' dim')+(open?' open':'')+'" data-lz="'+esc(l.id)+'" style="border-left-color:'+col+'">'
           +'<div class="lzacc-head">'
             +'<span class="lz-id" style="background:'+col+'">'+esc(l.id)+'</span>'
             +'<span class="lzacc-tx">'+esc(l.t)+'</span>'
@@ -1138,6 +1172,8 @@ function renderLernskript(mod,mw){
   app.innerHTML=h;
   app.querySelectorAll('.ls-mod').forEach(function(b){b.addEventListener('click',function(){renderLernskript(b.dataset.mod,null);});});
   app.querySelectorAll('.ls-mw').forEach(function(b){b.addEventListener('click',function(){renderLernskript(mod,b.dataset.mw);});});
+  var mwT=app.querySelector('.mw-toggle'), mwS=app.querySelector('.mw-summary');
+  if(mwT&&mwS){ mwT.addEventListener('click',function(){ var o=!mwS.classList.contains('open'); mwS.classList.toggle('open',o); mwT.classList.toggle('open',o); }); }
   app.querySelectorAll('.lzacc:not(.flat) .lzacc-head').forEach(function(head){
     head.addEventListener('click',function(e){
       if(e.target.closest('.act,a')) return;
