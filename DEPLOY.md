@@ -2,37 +2,45 @@
 
 ## Zwei Rollen, klar getrennt
 
-- **Werkstatt** (`~/Charite /Klausur Semester 1 /`, **nicht** in diesem Repo):
-  Pipeline (`pipeline/`), Roh-Altklausuren, Modulskripte, `semesters/`-Quelldaten,
-  `output/`. Privat und groß. Erzeugt die ausgelieferten Dateien.
+- **Werkstatt** (`~/Charite /Klausur Semester 1 /`, **nicht** dieses Repo):
+  Pipeline (`pipeline/`), Roh-Altklausuren, Modulskripte, `semesters/`-Quelldaten, `output/`.
+  Hier liegen auch die **Deploy-Steuerdateien** `deploy.sh` und `wrangler.toml`
+  (bewusst hier, damit sie nicht mit ausgeliefert werden).
 - **Deploy-Repo** (DIESES Repo, GitHub `CasparSchumacher/ExamSemester1`):
-  ausschließlich die ausgelieferte Website. **Eine** Quelle, git-verbunden mit Cloudflare Pages.
+  ausschließlich die ausgelieferte Website + `functions/`. Reiner Inhalt, keine Config.
 
-Die Werkstatt ist das Gedächtnis; dieses Repo ist das, was die Welt sieht.
+## Deploy-Modell: Cloudflare Pages (Direct Upload), Ein-Befehl
 
-## Deploy-Mechanik: push = live
+> Hinweis: „push = live" über Git ist nicht möglich — Cloudflares „Connect to Git"
+> erzeugt heute einen **Worker** (ohne `*.pages.dev`-URL), und Direct-Upload-Pages-Projekte
+> lassen sich nicht auf Git umstellen. Deshalb: bewusst **Direct Upload per Skript**.
 
-Cloudflare Pages (Projekt `casomorphin`) ist mit diesem GitHub-Repo verbunden.
+**Deployen — ein Befehl, aus der Werkstatt:**
+```bash
+./deploy.sh            # Production → https://casomorphin.pages.dev
+./deploy.sh test       # Preview    → https://test.casomorphin.pages.dev
+```
+`deploy.sh` macht `cd publish && npx wrangler pages deploy . --project-name=casomorphin`.
+Das KV-Binding `REPORTS` kommt aus `../wrangler.toml` (Werkstatt), das `wrangler` beim
+Deploy automatisch findet.
 
-- Push auf `main` → automatischer Production-Deploy → <https://casomorphin.pages.dev>
-- Push auf jeden anderen Branch → automatische **Preview-URL**
-  (z. B. `design-refresh.casomorphin.pages.dev`) — ideal zum risikofreien Ausprobieren.
-- **Kein** `wrangler pages deploy` mehr, **kein** Kopieren nach `site/`.
+**Git nutzt du weiter** für History, Branches und Backup (genau wie beim Design-Refresh).
+Nur das *Live-Schalten* ist ein expliziter `./deploy.sh` statt Auto-Deploy.
+Typischer Ablauf: ändern → `git commit && git push` (Sicherung) → `./deploy.sh` (live).
 
-### Build-Settings im Pages-Projekt (einmalig im Dashboard gesetzt)
-| Feld | Wert |
-|------|------|
-| Framework preset | None |
-| Build command | *(leer)* |
-| Build output directory | `/` |
-| Functions | `functions/` wird automatisch erkannt → Endpoint `/api/report` |
-| KV-Binding | `REPORTS` → Namespace-ID `884e88c78caf45a0a8f08e4ec1b2aabf` |
+## Projekt-Eckdaten
+
+- Cloudflare-Account-ID: `67c87e8bfa3c43c7905d9340d3a34b8a`
+- Pages-Projekt: **`casomorphin`** (Direct Upload) → `casomorphin.pages.dev`
+- Pages-Function: `functions/api/report.js` → Endpoint `/api/report` (Fehler-Meldungen)
+- KV-Binding: `REPORTS` → Namespace-ID `884e88c78caf45a0a8f08e4ec1b2aabf`
+  (definiert in der Werkstatt-`wrangler.toml`)
 
 ## Inhalt dieses Repos
 
 `index.html`, `start.html` (Semester-Hub), `semester-N.html`, `data/semester-N.js`,
-`img/`, `skript/`, `fonts/` (self-hosted), `Abbildungen.html`, `Lernkartei_Gesamt.html`,
-`functions/api/report.js` (Fehler-Meldungen → KV).
+`img/`, `skript/`, `fonts/` (self-hosted Hanken Grotesk), `Abbildungen.html`,
+`Lernkartei_Gesamt.html`, `functions/api/report.js`.
 
 ## Neues Semester hinzufügen
 
@@ -40,19 +48,18 @@ Cloudflare Pages (Projekt `casomorphin`) ist mit diesem GitHub-Repo verbunden.
    `semesters/sN/config.json` füllen.
 2. `python3 pipeline/run_semester.py sN` (LLM-Stufen lt. `pipeline/PIPELINE_AGENT.md`
    abarbeiten, dann erneut starten — resumiert per Content-Hash).
-3. Build-Stufe erzeugt `semester-N.html` + `data/semester-N.js` (+ neue Bilder)
-   → in **dieses** Repo legen.
+3. Build-Stufe erzeugt `semester-N.html` + `data/semester-N.js` (+ Bilder) → in **dieses** Repo.
 4. Im Semester-Hub `start.html` das Semester N freischalten.
-5. `git add -A && git commit -m "Semester N" && git push` → live.
+5. `git commit && git push` (Sicherung) → `./deploy.sh` (live).
 
 ## Rollback
 
-- Dashboard → Pages → `casomorphin` → *Deployments* → früheren Deploy → **Rollback**.
-- Oder lokal: `git revert <commit> && git push`.
+- Dashboard → Workers & Pages → `casomorphin` → *Deployments* → früheren Deploy → **Rollback**.
+- Oder lokal: `git revert <commit>` → `./deploy.sh`.
 
-## Altlasten (nach erfolgreicher Git-Migration entfernbar)
+## Aufgeräumt / zu beachten
 
-- `../site/` — alte Direct-Upload-Quelle, wird nicht mehr gebraucht.
-- `../wrangler.toml` mit `pages_build_output_dir = "site"` — galt nur für den alten
-  `wrangler pages deploy`-Weg.
-- `.nojekyll` — war ein GitHub-Pages-Artefakt (entfernt).
+- Der alte Ordner `../site/` (frühere Deploy-Quelle) wird **nicht mehr gebraucht** —
+  kann gelöscht werden.
+- Ein versehentlich angelegter **Worker** namens `casomorphin` sollte im Dashboard
+  gelöscht werden (das **Pages**-Projekt `casomorphin` bleibt!).
