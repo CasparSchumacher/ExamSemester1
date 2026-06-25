@@ -475,6 +475,11 @@ body.dark .mw-fertig{ background:#16331f; color:#83e0a3 }
 .cmdk-item.active{ background:color-mix(in oklab, var(--brand) 12%, var(--surface-2)) }
 .cmdk-item .dot{ width:8px; height:8px; border-radius:50%; flex:0 0 auto }
 .cmdk-item .lbl{ font-weight:600; font-size:14px; color:var(--ink); white-space:nowrap }
+.cmdk-item .ql{ flex:1; min-width:0; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.cmdk-item .sq{ font-weight:700; color:var(--brand) }
+.searchchip{ display:inline-flex; align-items:center; gap:9px; background:color-mix(in oklab,var(--brand) 9%, var(--surface)); border:1px solid color-mix(in oklab,var(--brand) 30%, var(--line)); color:var(--ink); border-radius:999px; padding:6px 8px 6px 13px; font-size:13.5px; font-weight:500 }
+.searchchip .sx{ cursor:pointer; color:var(--mut); font-weight:700; line-height:1; width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center }
+.searchchip .sx:hover{ color:var(--ink); background:var(--surface-2) }
 .cmdk-item .id{ font-variant-numeric:tabular-nums; font-weight:600; font-size:13px; color:var(--ink);
   letter-spacing:.01em; flex:0 0 auto }
 .cmdk-item .hint{ font-size:13px; color:var(--mut); flex:1 1 auto; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0 }
@@ -933,7 +938,8 @@ function renderFortschritt(){
   var pr=document.getElementById('preset'); if(pr)pr.addEventListener('click',function(){if(confirm('Gesamten Lernfortschritt zurücksetzen?')){prog={};saveProg(prog);renderFortschritt();}});
 }
 
-var LN={mod:'all',mw:'all',sub:'lernziele'};
+var LN={mod:'all',mw:'all',sub:'lernziele',q:''};
+window.__uebenSearch=function(query){ LN.q=query||''; showView('lernen'); };
 function lzRowsHtml(){
   var verByMw={}; LZ.forEach(function(l){var k=l.mod+'|'+l.mw;(verByMw[k]=verByMw[k]||[]);if(verByMw[k].indexOf(l.ver)<0)verByMw[k].push(l.ver);});
   // Fortschritt: bearbeitete (beantwortete) Fragen pro Lernziel/Veranstaltung/Modulwoche
@@ -980,13 +986,13 @@ function markCardDone(card,st){ if(!card)return; card.classList.remove('done-ok'
 function markDoneCards(root){ (root||app).querySelectorAll('.card[data-id]').forEach(function(c){ var st=prog[c.dataset.id]; if(st!=null) markCardDone(c,st); }); }
 function renderLernen(){
   var h='<div class="toolbar">'+chipRow()
-   +'<div class="lnrow2"><input class="search" id="lns" placeholder="Suchen (Frage, Antwort, Stichwort, Lernziel …)"></div>'
+   +(LN.q?('<div class="lnrow2"><span class="searchchip">🔎 <b>„'+esc(LN.q)+'"</b><span class="sx" title="Filter entfernen" role="button" aria-label="Suchfilter entfernen">✕</span></span></div>'):'')
    +'<div class="sub lnhint" id="lnhint"></div></div>';
   h+='<div id="ln-fr">'+renderGrouped(Q)+'</div>';
   app.innerHTML=h;
   app.querySelectorAll('.modbtn').forEach(function(b){b.addEventListener('click',function(){LN.mod=b.dataset.mod;app.querySelectorAll('.modbtn').forEach(function(x){x.classList.toggle('active',x===b);});lnApply();});});
   app.querySelectorAll('.mwbtn').forEach(function(b){b.addEventListener('click',function(){LN.mw=b.dataset.mw;app.querySelectorAll('.mwbtn').forEach(function(x){x.classList.toggle('active',x===b);});lnApply();});});
-  document.getElementById('lns').addEventListener('input',lnApply);
+  var _sx=app.querySelector('.searchchip .sx'); if(_sx)_sx.addEventListener('click',function(){ LN.q=''; renderLernen(); });
   lnApply();
   markDoneCards(app);
 }
@@ -1000,7 +1006,7 @@ function lnHeaders(box){ var kids=box.children,i,j;
     el.style.display=vis?'':'none'; }
 }
 function lnApply(){
-  var t=(document.getElementById('lns').value||'').trim().toLowerCase();
+  var t=(LN.q||'').trim().toLowerCase();
   var mod=LN.mod,mw=LN.mw, fr=document.getElementById('ln-fr'); if(!fr)return;
   fr.querySelectorAll('.lz').forEach(function(b){var okm=(mod==='all'||b.dataset.mod===mod)&&(mw==='all'||b.dataset.mw===mw),any=false;
     b.querySelectorAll('.card').forEach(function(c){var ok=okm&&(!t||c.dataset.s.indexOf(t)>=0);c.style.display=ok?'':'none';if(ok)any=true;});
@@ -1486,7 +1492,7 @@ updMarkCount(); showView('lernen');
   var overlay=document.createElement('div'); overlay.className='cmdk-overlay';
   overlay.innerHTML='<div class="cmdk" role="dialog" aria-label="Befehlspalette">'
     +'<div class="cmdk-input-wrap"><span class="cmdk-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span>'
-    +'<input class="cmdk-input" placeholder="Springe zu Lernziel, Modul, Tab …" autocomplete="off" spellcheck="false" aria-label="Suche"></div>'
+    +'<input class="cmdk-input" placeholder="Suche: Frage, Lernziel, Modul, Tab …" autocomplete="off" spellcheck="false" aria-label="Suche"></div>'
     +'<div class="cmdk-list"></div>'
     +'<div class="cmdk-footer"><span><span class="k">↑</span><span class="k">↓</span>Navigieren</span>'
     +'<span><span class="k">↵</span>Öffnen</span><span><span class="k">Esc</span>Schließen</span></div></div>';
@@ -1512,29 +1518,31 @@ updMarkCount(); showView('lernen');
     return Object.keys(pairs).sort().map(function(k){ var p=k.split('|'); return {kind:'mw', mod:p[0], mw:p[1], label:p[0]+' · '+p[1], hint:'Üben gefiltert auf '+p[0]+' '+p[1]}; });
   })();
   var LZITEMS=LZ.map(function(l){ return {kind:'lz', id:l.id, label:l.id, hint:l.t, mod:l.mod, mw:l.mw}; });
+  var Q=S.questions||[];
+  var QITEMS=Q.map(function(q){ var qt=(q.q||''); return {kind:'q', id:q.id, lz:q.lz, mod:q.mod, mw:q.mw, label:(qt.length>80?qt.slice(0,80)+'…':qt), hint:(q.a?q.a+' · ':'')+q.mod+'·'+q.mw, search:((q.q||'')+' '+(q.a||'')+' '+(q.th||'')).toLowerCase() }; });
 
   var current=[], sel=0;
 
   function score(it,lq){
-    var lab=(it.label||'').toLowerCase(), hint=(it.hint||'').toLowerCase(), id=(it.id||'').toLowerCase();
-    var p1=lab.indexOf(lq), p2=hint.indexOf(lq), p3=id.indexOf(lq);
-    if(p1<0&&p2<0&&p3<0) return -1;
+    var lab=(it.label||'').toLowerCase(), hint=(it.hint||'').toLowerCase(), id=(it.id||'').toLowerCase(), ex=it.search||'';
+    var p1=lab.indexOf(lq), p2=hint.indexOf(lq), p3=id.indexOf(lq), p4=ex?ex.indexOf(lq):-1;
+    if(p1<0&&p2<0&&p3<0&&p4<0) return -1;
     var s=0;
     if(p3===0) s+=120; else if(p3>=0) s+=60;
     if(p1===0) s+=80; else if(p1>=0) s+=40;
     if(p2>=0) s+=20;
+    if(p4>=0) s+=12;
     return s;
   }
   function compute(q){
     if(!q){ return [{sec:'Navigieren'}].concat(TABS.slice(0,7), [{sec:'Module'}], MODITEMS, [{sec:'Käse'}], [TABS[7]]); }
     var lq=q.toLowerCase();
-    var all=TABS.concat(MODITEMS).concat(MWITEMS).concat(LZITEMS);
-    var scored=[]; all.forEach(function(it){ var s=score(it,lq); if(s>=0) scored.push({it:it,s:s}); });
-    scored.sort(function(a,b){ return b.s-a.s; });
-    var top=scored.slice(0,40).map(function(x){return x.it;});
-    var labels={tab:'Tabs', mod:'Module', mw:'Modulwochen', lz:'Lernziele', action:'Aktionen'};
-    var out=[], seen={};
-    top.forEach(function(it){ if(!seen[it.kind]){ out.push({sec:labels[it.kind]||''}); seen[it.kind]=1; } out.push(it); });
+    function pick(arr,cap){ var sc=[]; arr.forEach(function(it){ var s=score(it,lq); if(s>=0) sc.push({it:it,s:s}); }); sc.sort(function(a,b){return b.s-a.s;}); return {top:sc.slice(0,cap).map(function(x){return x.it;}), total:sc.length}; }
+    var qr=pick(QITEMS,6), lzr=pick(LZITEMS,10), mwr=pick(MWITEMS,6), modr=pick(MODITEMS,3), tabr=pick(TABS,6);
+    var out=[];
+    if(qr.top.length){ out.push({sec:'Fragen'}); qr.top.forEach(function(it){ out.push(it); }); out.push({kind:'searchq', q:q, count:qr.total, label:'Alle '+qr.total+' Treffer mit „'+q+'" im Üben anzeigen'}); }
+    function grp(sec,r){ if(r.top.length){ out.push({sec:sec}); r.top.forEach(function(it){ out.push(it); }); } }
+    grp('Lernziele',lzr); grp('Modulwochen',mwr); grp('Module',modr); grp('Tabs & mehr',tabr);
     return out;
   }
   function selectables(){ return current.filter(function(x){return !x.sec;}); }
@@ -1544,13 +1552,17 @@ updMarkCount(); showView('lernen');
       if(e.sec){ html+='<div class="cmdk-section">'+esc(e.sec)+'</div>'; return; }
       var active=(si===sel);
       html+='<div class="cmdk-item'+(active?' active':'')+'" data-i="'+ci+'">';
-      if(e.kind==='mod'||e.kind==='mw'||e.kind==='lz') html+='<span class="dot" style="background:'+modCol(e.mod)+'"></span>';
+      if(e.kind==='mod'||e.kind==='mw'||e.kind==='lz'||e.kind==='q') html+='<span class="dot" style="background:'+modCol(e.mod)+'"></span>';
       if(e.kind==='lz'){ html+='<span class="id">'+esc(e.id)+'</span><span class="hint">'+esc(e.hint)+'</span>'; }
+      else if(e.kind==='q'){ html+='<span class="lbl ql">'+esc(e.label)+'</span>'; }
+      else if(e.kind==='searchq'){ html+='<span class="lbl sq">'+esc(e.label)+'</span>'; }
       else { html+='<span class="lbl">'+esc(e.label)+'</span>'; if(e.hint) html+='<span class="hint">'+esc(e.hint)+'</span>'; }
       if(e.kind==='tab') html+='<span class="kbd">Tab</span>';
       else if(e.kind==='lz') html+='<span class="kbd">LZ</span>';
       else if(e.kind==='mw') html+='<span class="kbd">MW</span>';
       else if(e.kind==='mod') html+='<span class="kbd">Mod</span>';
+      else if(e.kind==='q') html+='<span class="kbd">Frage</span>';
+      else if(e.kind==='searchq') html+='<span class="kbd">↵</span>';
       else if(e.kind==='action') html+='<span class="kbd">↻</span>';
       html+='</div>';
       si++;
@@ -1572,11 +1584,13 @@ updMarkCount(); showView('lernen');
           var modBtn=document.querySelector('.modbtn[data-mod="'+item.mod+'"]'); if(modBtn) modBtn.click();
           if(item.kind==='mw'){ var mwBtn=document.querySelector('.mwbtn[data-mw="'+item.mw+'"]'); if(mwBtn) mwBtn.click(); }
         }, 60);
-      } else if(item.kind==='lz'){
-        // synthetic .lzgo triggert renderLzDetail via document click handler im Hauptscript
-        var el=document.createElement('span'); el.className='lzgo'; el.dataset.lz=item.id;
+      } else if(item.kind==='lz' || item.kind==='q'){
+        // synthetic .lzgo triggert renderLzDetail (Frage-Treffer -> Lernziel der Frage)
+        var el=document.createElement('span'); el.className='lzgo'; el.dataset.lz=(item.kind==='q'?item.lz:item.id);
         el.style.cssText='position:absolute;left:-9999px';
         document.body.appendChild(el); el.click(); setTimeout(function(){ document.body.removeChild(el); }, 0);
+      } else if(item.kind==='searchq'){
+        if(typeof window.__uebenSearch==='function') window.__uebenSearch(item.q);
       }
     }, 10);
   }
