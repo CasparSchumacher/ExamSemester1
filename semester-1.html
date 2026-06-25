@@ -375,6 +375,17 @@ body.dark .navbar{ background:color-mix(in oklab, var(--bg) 78%, transparent); }
   @keyframes panel-in{ from{ opacity:0; transform:translateY(4px) } to{ opacity:1; transform:none } }
 }
 
+/* Bereits beantwortete Fragen markieren */
+.qdone{ display:inline-block; font-size:10px; font-weight:800; letter-spacing:.03em; border-radius:20px; padding:2px 9px; margin-right:8px; vertical-align:middle; text-transform:none }
+.qdone.ok{ background:#dcfce7; color:#15803d }
+.qdone.wrong{ background:#fde9c8; color:#b45309 }
+body.dark .qdone.ok{ background:#16331f; color:#83e0a3 }
+body.dark .qdone.wrong{ background:#3a2f12; color:#e7c66b }
+.card.done-ok{ background:color-mix(in oklab,#16a34a 4%, transparent) }
+.card.done-wrong{ background:color-mix(in oklab,#d97706 5%, transparent) }
+body.dark .card.done-ok{ background:color-mix(in oklab,#16a34a 11%, transparent) }
+body.dark .card.done-wrong{ background:color-mix(in oklab,#d97706 13%, transparent) }
+
 /* Lernen-Reiter: Lernziel-Akkordeon nach Veranstaltung */
 .ls-count-bar{ font-size:12px; color:var(--mut); font-weight:600; margin:16px 2px 2px }
 .ls-vh{ font-size:11.5px; font-weight:700; color:var(--mut); text-transform:uppercase; letter-spacing:.05em; margin:20px 0 8px; padding:2px 0 2px 11px; border-left:3px solid var(--line) }
@@ -917,6 +928,9 @@ function chipRow(){
    +['MW1','MW2','MW3','MW4'].map(function(w){return '<button class="chip mwbtn'+(LN.mw===w?' active':'')+'" data-mw="'+w+'">'+w+'</button>';}).join('')
    +'</div></div>';
 }
+function doneBadge(st){ return st===1 ? '<span class="qdone ok">✓ richtig</span>' : '<span class="qdone wrong">✗ falsch</span>'; }
+function markCardDone(card,st){ if(!card)return; card.classList.remove('done-ok','done-wrong'); card.classList.add('done', st===1?'done-ok':'done-wrong'); var th=card.querySelector('.thema'); if(!th)return; var old=th.querySelector('.qdone'); if(old)old.remove(); th.insertAdjacentHTML('afterbegin', doneBadge(st)); }
+function markDoneCards(root){ (root||app).querySelectorAll('.card[data-id]').forEach(function(c){ var st=prog[c.dataset.id]; if(st!=null) markCardDone(c,st); }); }
 function renderLernen(){
   var h='<div class="toolbar">'+chipRow()
    +'<div class="lnrow2"><div class="subseg"><button class="subtab'+(LN.sub==='lernziele'?' active':'')+'" data-sub="lernziele">Lernziele</button><button class="subtab'+(LN.sub==='fragen'?' active':'')+'" data-sub="fragen">Fragen</button></div>'
@@ -929,6 +943,7 @@ function renderLernen(){
   app.querySelectorAll('.subtab').forEach(function(b){b.addEventListener('click',function(){LN.sub=b.dataset.sub;app.querySelectorAll('.subtab').forEach(function(x){x.classList.toggle('active',x===b);});lnApply();});});
   document.getElementById('lns').addEventListener('input',lnApply);
   lnApply();
+  markDoneCards(app);
 }
 function lnHeaders(box){ var kids=box.children,i,j;
   for(i=0;i<kids.length;i++){ var el=kids[i]; if(el.className.indexOf('grp-')<0)continue;
@@ -974,6 +989,7 @@ function lnApply(){
   }
 }
 function renderLzDetail(lid){
+  ST.view='lernen'; setTab('lernen');
   var l=LZ.filter(function(x){return x.id===lid})[0]; var qs=Q.filter(function(q){return q.lz===lid}); var col=MODCOL[l.mod]||'#666';
   var xref=(XREF[lid]||[]);
   window.scrollTo(0,0);
@@ -988,7 +1004,7 @@ function renderLzDetail(lid){
     });
   }
   h+='</div>';
-  app.innerHTML=h; document.getElementById('backlz').addEventListener('click',function(){LN.sub='lernziele';showView('lernen');});
+  app.innerHTML=h; markDoneCards(app); document.getElementById('backlz').addEventListener('click',function(){LN.sub='lernziele';showView('lernen');});
 }
 
 function renderMarkiert(){
@@ -1003,7 +1019,7 @@ function renderMarkiert(){
   h+='<div class="sub" style="margin-top:4px">Markierungen bleiben in diesem Browser gespeichert – auch nach dem Schließen des Tabs. Für ein anderes Gerät oder als Sicherung: „Sichern / Exportieren" → Backup-Code dort „Importieren".</div></div>';
   if(!qs.length){h+='<div class="empty-msg">Noch keine Fragen markiert. Klicke bei einer Frage auf „☆ markieren", um sie hier zu sammeln (z.B. schwierige Fragen). Oder importiere einen Backup-Code von einem anderen Gerät.</div>';}
   else { h+='<div class="lz" style="border-left-color:#b45309">'; qs.forEach(function(q){h+=cardHtml(q);}); h+='</div>'; }
-  app.innerHTML=h;
+  app.innerHTML=h; markDoneCards(app);
   document.getElementById('mkimport').addEventListener('click',importMarks);
   if(qs.length){ document.getElementById('mkquiz').addEventListener('click',function(){startQuizWith(shuffle(ids));});
     document.getElementById('mkexport').addEventListener('click',exportMarks);
@@ -1231,6 +1247,7 @@ document.addEventListener('click',function(e){
   var opt=e.target.closest('.opt'); if(opt){var card=opt.closest('.card'); if(card && !card.classList.contains('answered')){card.classList.add('answered'); var ok=!!opt.dataset.correct; opt.classList.add(ok?'chosen-correct':'chosen-wrong');
     if(!ok)card.classList.add('explain-open');
     var pid=card.dataset.id; if(pid){prog[pid]=ok?1:0; saveProg(prog);
+      if(!QZ)markCardDone(card,ok?1:0);
       if(ok){var gained=gameOnCorrect(pid,qById[pid]); if(gained>0&&gamifyOn())xpPopup(opt,gained);} else {gameOnWrong();}}
     if(QZ){var qid=card.dataset.id; if(QZ.ids[QZ.idx]===qid && !QZ.res.hasOwnProperty(qid)){QZ.res[qid]=ok; var nx=document.getElementById('nx'); if(nx)nx.disabled=false;}}
   } return; }
