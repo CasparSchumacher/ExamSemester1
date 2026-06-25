@@ -417,6 +417,22 @@ body.dark .card.done-wrong{ background:color-mix(in oklab,#d97706 13%, transpare
 .ls-nokw{ border-top:1px solid var(--line); padding:11px 0 0; color:var(--mut); font-size:13.5px; font-style:italic }
 .lzacc-actions{ margin-top:11px; display:flex; flex-wrap:wrap; gap:8px 18px }
 body.dark .lzacc{ background:#171c22 }
+/* Üben→Lernziele: Fortschritt / abgehakt */
+.lzr-check{ color:#16a34a; font-weight:800 }
+.lzr-part{ color:var(--mut); font-weight:700; font-variant-numeric:tabular-nums }
+.lzrow.done{ background:color-mix(in oklab,#16a34a 6%, var(--surface)) }
+.lzrow.done .id{ color:#15803d }
+body.dark .lzrow.done{ background:color-mix(in oklab,#16a34a 13%, var(--surface)) }
+.grp-check{ color:#15803d; font-weight:800; font-size:11px; letter-spacing:.02em; background:#dcfce7; border-radius:20px; padding:2px 9px }
+body.dark .grp-check{ background:#16331f; color:#83e0a3 }
+.ver-head .ver-check{ color:#16a34a; font-weight:800 }
+.ver-head.done{ color:#15803d }
+body.dark .ver-head.done{ color:#83e0a3 }
+/* Lernen: MW-Pill + Modulskript-Pill als Paar */
+.mw-row{ display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:6px 0 2px }
+.mw-row .mw-head{ margin:0; border:1.5px solid transparent }
+.skriptbtn{ display:inline-flex; align-items:center; margin:0; padding:6px 14px; border:1.5px solid var(--mc,#2563eb); color:var(--mc,#2563eb); background:var(--surface); border-radius:999px; font-size:12px; font-weight:700; text-decoration:none; transition:box-shadow .15s var(--ease),background .15s var(--ease) }
+.skriptbtn:hover{ box-shadow:var(--sh-1); background:color-mix(in oklab,var(--mc,#2563eb) 9%, var(--surface)) }
 
 /* ⌘K Befehlspalette */
 .cmdk-overlay{ position:fixed; inset:0; background:rgba(20,16,12,.42); -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px);
@@ -900,22 +916,33 @@ function renderFortschritt(){
 var LN={mod:'all',mw:'all',sub:'lernziele'};
 function lzRowsHtml(){
   var verByMw={}; LZ.forEach(function(l){var k=l.mod+'|'+l.mw;(verByMw[k]=verByMw[k]||[]);if(verByMw[k].indexOf(l.ver)<0)verByMw[k].push(l.ver);});
+  // Fortschritt: bearbeitete (beantwortete) Fragen pro Lernziel/Veranstaltung/Modulwoche
+  var totByLz={}, ansByLz={};
+  Q.forEach(function(q){ totByLz[q.lz]=(totByLz[q.lz]||0)+1; if(prog[q.id]!=null) ansByLz[q.lz]=(ansByLz[q.lz]||0)+1; });
+  var verAgg={}, mwAgg={};
+  LZ.forEach(function(l){ var t=totByLz[l.id]||0; if(!t)return; var a=ansByLz[l.id]||0;
+    var vk=l.mod+'|'+l.mw+'|'+l.ver; (verAgg[vk]=verAgg[vk]||{t:0,a:0}); verAgg[vk].t+=t; verAgg[vk].a+=a;
+    var mk=l.mod+'|'+l.mw; (mwAgg[mk]=mwAgg[mk]||{t:0,a:0}); mwAgg[mk].t+=t; mwAgg[mk].a+=a; });
+  function aDone(o){ return !!(o && o.t>0 && o.a>=o.t); }
   var out='',cmod=null,cmw=null,cver=null;
   LZ.forEach(function(l){ var col=MODCOL[l.mod]||'#666'; var k=l.mod+'|'+l.mw;
     if(l.mod!==cmod){cmod=l.mod;cmw=null;out+='<div class="grp-mod"><span class="dot" style="background:'+col+'"></span>'+esc(l.mod+' · '+(MODNAME[l.mod]||''))+'</div>';}
     if(l.mw!==cmw){cmw=l.mw;cver=null; var st=mwStat(l.mod,l.mw); var pc=st.tot?Math.round(st.c/st.tot*100):0;
       out+='<div class="grp-mw"><span class="grp-mw-t">'+esc(l.mod+' · '+l.mw)+'</span>'
+        +(aDone(mwAgg[k])?'<span class="grp-check">✓ fertig</span>':'')
         +(st.tot?('<span class="mwmini"><span class="mwbar"><i style="width:'+pc+'%"></i></span>'+st.c+'/'+st.tot+' richtig</span>'):'')+'</div>';
       if(verByMw[k].length>1){
         out+='<div class="ver-dd" data-mod="'+l.mod+'" data-mw="'+l.mw+'"><button class="ver-dd-btn" type="button">Lehrveranstaltung <span class="dd-caret">▾</span></button><div class="ver-menu">'
           +verByMw[k].map(function(v,vi){return '<span class="ver-item" data-target="lzver-'+l.mod+'-'+l.mw+'-'+vi+'">'+esc(v)+'</span>';}).join('')+'</div></div>';
       }}
-    if(l.ver!==cver){cver=l.ver; var vidx=verByMw[k].indexOf(l.ver); out+='<div class="ver-head anchor" id="lzver-'+l.mod+'-'+l.mw+'-'+vidx+'" data-mod="'+l.mod+'" data-mw="'+l.mw+'">'+esc(l.ver)+'</div>';}
+    if(l.ver!==cver){cver=l.ver; var vidx=verByMw[k].indexOf(l.ver); var vd=aDone(verAgg[l.mod+'|'+l.mw+'|'+l.ver]); out+='<div class="ver-head anchor'+(vd?' done':'')+'" id="lzver-'+l.mod+'-'+l.mw+'-'+vidx+'" data-mod="'+l.mod+'" data-mw="'+l.mw+'">'+esc(l.ver)+(vd?' <span class="ver-check">✓</span>':'')+'</div>';}
     var ss=esc((l.id+' '+l.t+' '+l.ver+' '+l.mod+' '+l.mw).toLowerCase());
     var refn=(XREF[l.id]||[]).length;
-    out+='<div class="lzrow'+((l.n||refn)?'':' empty')+'" data-lz="'+esc(l.id)+'" data-mod="'+l.mod+'" data-mw="'+l.mw+'" data-s="'+ss+'" style="border-left-color:'+col+'">'
+    var t=totByLz[l.id]||0, a=ansByLz[l.id]||0, done=t>0&&a>=t, part=a>0&&a<t;
+    var ct = !l.n ? (refn?'↗ geteilt ›':'—') : (done?('<span class="lzr-check">✓</span> '+t+'/'+t) : (part?('<span class="lzr-part">'+a+'/'+t+'</span> ›') : (t+' Fragen ›')));
+    out+='<div class="lzrow'+((l.n||refn)?'':' empty')+(done?' done':'')+'" data-lz="'+esc(l.id)+'" data-mod="'+l.mod+'" data-mw="'+l.mw+'" data-s="'+ss+'" style="border-left-color:'+col+'">'
       +'<span class="id">'+esc(l.id)+'</span><span class="tx">'+esc(l.t)+'</span>'
-      +'<span class="ct">'+(l.n?(l.n+' Fragen ›'):(refn?'↗ geteilt ›':'—'))+'</span></div>';
+      +'<span class="ct">'+ct+'</span></div>';
   });
   return out;
 }
@@ -1148,19 +1175,20 @@ function renderLernskript(mod,mw){
   mws.forEach(function(w){ h+='<button class="chip ls-mw'+(w===mw?' active':'')+'" data-mw="'+w+'">'+w+'</button>'; });
   h+='</div></div>';
   h+='<div class="mod-head" style="background:'+col+';margin-top:14px">'+esc(mod+" · "+(MODNAME[mod]||""))+'</div>';
-  var intro=MWI[mod+'|'+mw];
+  var intro=MWI[mod+'|'+mw], lsu=skriptUrl(mod,mw);
+  h+='<div class="mw-row">';
+  if(intro) h+='<div class="mw-head mw-toggle" style="background:'+col+'">'+mod+' · '+mw+'<span class="mw-cev">▸</span></div>';
+  else h+='<div class="mw-head" style="background:'+col+'">'+mod+' · '+mw+'</div>';
+  if(lsu) h+='<a class="skriptbtn" href="'+lsu.url+'" target="_blank" rel="noopener" style="--mc:'+col+'">Im Modulskript nachlesen · ab S. '+lsu.page+' ↗</a>';
+  h+='</div>';
   if(intro){
     var sm=mwBullets(intro);
-    h+='<div class="mw-head mw-toggle" style="background:'+col+'">'+mod+' · '+mw+'<span class="mw-cev">▸</span></div>';
     h+='<div class="mw-summary" style="--mc:'+col+'">';
     if(sm.title) h+='<div class="mw-summary-hd">Themen der Woche · '+esc(sm.title)+'</div>';
     if(sm.bullets.length) h+='<ul class="mw-bullets">'+sm.bullets.map(function(b){return '<li>'+esc(b)+'</li>';}).join('')+'</ul>';
     else h+='<div class="mw-summary-hd" style="padding:13px 18px">'+esc(intro)+'</div>';
     h+='</div>';
-  } else {
-    h+='<div class="mw-head" style="background:'+col+'">'+mod+' · '+mw+'</div>';
   }
-  var lsu=skriptUrl(mod,mw); if(lsu) h+='<a class="skriptbtn" href="'+lsu.url+'" target="_blank" rel="noopener" style="border-color:'+col+';color:'+col+'">Im ausführlichen Modulskript nachlesen · ab Seite '+lsu.page+' ↗</a>';
   if(!lzs.length){ h+='<div class="empty-msg">Für diese Modulwoche sind keine Lernziele hinterlegt.</div>'; }
   else {
     h+='<div class="ls-count-bar">'+lzs.length+' Lernziel'+(lzs.length===1?'':'e')+(nKw?(' · '+nKw+' mit Kurz-Zusammenfassung'):'')+'</div>';
@@ -1185,7 +1213,7 @@ function renderLernskript(mod,mw){
       });
     });
   }
-  app.innerHTML=h;
+  app.innerHTML='<div class="ls-wrap">'+h+'</div>';
   app.querySelectorAll('.ls-mod').forEach(function(b){b.addEventListener('click',function(){renderLernskript(b.dataset.mod,null);});});
   app.querySelectorAll('.ls-mw').forEach(function(b){b.addEventListener('click',function(){renderLernskript(mod,b.dataset.mw);});});
   var mwT=app.querySelector('.mw-toggle'), mwS=app.querySelector('.mw-summary');
