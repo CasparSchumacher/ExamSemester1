@@ -83,7 +83,9 @@ body.dark .ver-item:hover{background:#1e2630}
 .cardmeta{margin-top:8px;font-size:12px;color:var(--mut);display:flex;flex-wrap:wrap;align-items:center;gap:6px}
 .mchip{display:inline-block;color:#fff;border-radius:5px;padding:1px 7px;font-weight:600;font-size:11px}
 .cardacts{margin-left:auto;display:flex;gap:10px} .act{color:#2563eb;cursor:pointer;font-size:12px;white-space:nowrap} .act:hover{text-decoration:underline} .act.mark.on{color:#b45309;font-weight:600}
-.badge{display:inline-block;font-size:11px;padding:1px 7px;border-radius:20px;margin-left:4px} .badge.freq{background:#fef3c7;color:#92400e} .badge.wert{background:#fee2e2;color:#991b1b} .badge.alsolz{background:#e0e7ff;color:#3730a3;cursor:help}
+.badge{display:inline-block;font-size:11px;padding:1px 7px;border-radius:20px;margin-left:4px} .badge.freq{background:#fef3c7;color:#92400e} .badge.wert{background:#fee2e2;color:#991b1b} .badge.alsolz{background:#e0e7ff;color:#3730a3} .badge.prot{background:#eef0f2;color:#52606d} .badge.freq.hot{background:#fde68a;color:#7c4a02;font-weight:700}
+.tip{position:relative;cursor:help;outline:none} .tip>.tipbox{position:absolute;z-index:40;left:50%;top:calc(100% + 7px);transform:translateX(-50%);width:max-content;max-width:min(80vw,280px);background:var(--surface,#fff);color:var(--ink,#222);border:1px solid var(--line,#e5e7eb);border-radius:9px;box-shadow:var(--sh-pop,0 12px 34px rgba(0,0,0,.22));padding:8px 11px;font-size:12px;font-weight:400;line-height:1.45;text-align:left;white-space:normal;text-transform:none;letter-spacing:normal;opacity:0;visibility:hidden;transition:opacity .12s;pointer-events:none} .tip:hover>.tipbox,.tip:focus-visible>.tipbox,.tip:focus-within>.tipbox{opacity:1;visibility:visible} .tip>.tipbox b{color:var(--brand,#2563eb)} .tipbox .tsrc{display:block;margin-top:4px;color:var(--mut,#777);font-size:11px}
+@media(max-width:600px){.tip>.tipbox{left:auto;right:0;transform:none}}
 .xref-note{font-size:13px;color:var(--mut);margin:2px 0 8px;padding:8px 10px;border:1px dashed var(--line);border-radius:8px;background:rgba(99,102,241,.05)}
 .abb{margin:8px 0} .abb img{max-width:340px;max-height:260px;border:1px solid var(--line);border-radius:8px;cursor:zoom-in;background:#fff;display:block}
 .abbcap{font-size:11px;color:var(--mut);margin-top:3px} .abbmiss{font-size:12px;color:#b45309;font-style:italic;margin:8px 0}
@@ -109,7 +111,7 @@ body.dark .nextbtn{background:#2563eb;color:#fff}
 body.dark.mode-klausur .opt:hover,body.dark.mode-klausur .opt.correct:hover{background:#1e2630}
 body.dark .opt.chosen-wrong,body.dark.mode-klausur .card.answered .opt.chosen-wrong{background:#3a1b1b;border-color:#6b2f2f}
 body.dark.mode-klausur .card.answered .opt.correct,body.dark.mode-klausur .card.answered .opt.correct:hover{background:#173a23;border-color:#2f6b41}
-body.dark .badge.freq{background:#3a2f12;color:#e7c66b} body.dark .badge.alsolz{background:#23304d;color:#bcd0ff}
+body.dark .badge.freq{background:#3a2f12;color:#e7c66b} body.dark .badge.alsolz{background:#23304d;color:#bcd0ff} body.dark .badge.prot{background:#222a33;color:#9aa3ad} body.dark .badge.freq.hot{background:#4a3a12;color:#f0cf73} body.dark .tip>.tipbox{background:#1b211d}
 /* Lernziele-Liste */
 .lzrow{background:#fff;border:1px solid var(--line);border-left-width:4px;border-radius:10px;padding:10px 14px;margin:7px 0;cursor:pointer;display:flex;gap:10px;align-items:baseline} .lzrow:hover{border-color:#94a3b8}
 .lzrow .id{font-weight:700;font-size:12px;color:#334155;white-space:nowrap} .lzrow .tx{flex:1;font-size:13.5px} .lzrow .ct{font-size:12px;color:var(--mut);white-space:nowrap} .lzrow.empty{opacity:.55;cursor:default}
@@ -668,7 +670,11 @@ function optsHtml(q){ if(q.o&&q.o.length){ var sh=(typeof gamifyOn==='function'&
     return opts.map(function(o,i){var c=o[2]; var lab=sh?String.fromCharCode(97+i):o[0]; return '<li class="opt'+(c?' correct':'')+'"'+(c?' data-correct="1"':'')+'><span class="chk">'+(c?'✓':'')+'</span><span class="ol">'+esc(lab)+')</span> '+esc(o[1])+'</li>';}).join(''); } return '<li class="opt correct" data-correct="1"><span class="chk">✓</span> '+esc(q.a)+'</li>'; }
 function cardHtml(q){
   var col=MODCOL[q.mod]||'#666', mk=marks.has(q.id), kwt=KW[q.lz];
-  var badges=''; if(q.nk>=2) badges+='<span class="badge freq">×'+q.nk+' Klausuren</span>'; (q.w||[]).forEach(function(w){badges+='<span class="badge wert">'+esc(w)+'</span>';}); (q.xlz||[]).forEach(function(x){badges+='<span class="badge alsolz" title="'+esc(LZT[x]||'')+'">auch '+esc(x)+'</span>';});
+  var badges='';
+  if(q.nk>=2) badges+='<span class="badge freq'+(q.nk>=4?' hot':'')+' tip" tabindex="0">×'+q.nk+' Klausuren<span class="tipbox">In <b>'+q.nk+' Altklausuren</b> (oder sehr ähnlich) aufgetaucht — ein starker Hinweis auf Prüfungsrelevanz.'+(q.src?'<span class="tsrc">'+esc(q.src)+'</span>':'')+'</span></span>';
+  if(q.qt==='prot') badges+='<span class="badge prot tip" tabindex="0">Protokoll<span class="tipbox">Aus einem studentischen <b>Gedächtnisprotokoll</b> — Frage und Antwortoptionen können unvollständig oder ungenau sein.</span></span>';
+  (q.w||[]).forEach(function(w){badges+='<span class="badge wert">'+esc(w)+'</span>';});
+  (q.xlz||[]).forEach(function(x){badges+='<span class="badge alsolz tip" tabindex="0">auch '+esc(x)+'<span class="tipbox">'+esc(LZT[x]||'')+'</span></span>';});
   var sstr=esc((q.q+' '+(q.a||'')+' '+q.th+' '+q.mod+' '+q.mw+' '+q.lz).toLowerCase());
   var su=skriptUrl(q.mod,q.mw);
   var explain = kwt ? ('<div class="explain"><div class="explain-hd"><span class="ex-dot"></span>Erklärung<span class="ex-lz">· Lernziel '+esc(q.lz)+'</span><span class="betabadge" style="margin-left:auto">Beta</span></div>'
@@ -1223,7 +1229,7 @@ function renderLernskript(mod,mw){
           +'<div class="lzacc-head">'
             +'<span class="lz-id" style="background:'+col+'">'+esc(l.id)+'</span>'
             +'<span class="lzacc-tx">'+esc(l.t)+'</span>'
-            +'<span class="lzacc-meta">'+cnt
+            +'<span class="lzacc-meta">'+(l.hot?'<span class="badge freq tip" tabindex="0" style="margin-left:0">oft geprüft<span class="tipbox">Enthält Fragen, die in mehreren Altklausuren (oder sehr ähnlich) vorkamen — lohnt sich beim Lernen besonders.</span></span>':'')+cnt
               +(expandable?'<span class="lzacc-cev">▸</span>':'')+'</span>'
           +'</div>'
           +'<div class="lzacc-body">'
