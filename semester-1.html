@@ -144,6 +144,7 @@ body.dark .explain{background:#241f12;border-color:#3a3016;border-left-color:#d9
 .ex-distr-hd{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--mut);margin-bottom:4px} .ex-distr ul{margin:0;padding:0;list-style:none} .ex-distr li{margin:4px 0;font-size:13px;line-height:1.45} .ex-distr li b{color:var(--mut)} .ex-distr .exh{font-weight:600}
 .ex-warn{margin:9px 0 2px;padding:7px 11px;background:#fff4e0;border:1px solid #f0d9a8;border-radius:8px;font-size:13px;line-height:1.45;color:#8a5a12} body.dark .ex-warn{background:#2c2410;border-color:#4a3a16;color:#e7c66b}
 .ex-note{margin:7px 0 2px;font-size:12px;color:var(--mut);font-style:italic}
+.ln-pick{margin-top:14px;padding:30px 20px;text-align:center;color:var(--mut);font-size:14px;line-height:1.6;border:1px dashed var(--line);border-radius:14px;background:var(--surface-2,transparent)} .ln-pick b{color:var(--ink)} .ln-pick-sub{display:block;margin-top:7px;font-size:12.5px;opacity:.8}
 body.dark .explain-hd{background:#2b2412;color:#e7c66b;border-color:#3a3016}
 body.dark .explain-hd .ex-lz,body.dark .lsjump,body.dark .skriptlink{color:#e7c66b}
 body.dark .skriptbtn{background:#171c22}
@@ -1006,17 +1007,39 @@ function chipRow(){
 function doneBadge(st){ return st===1 ? '<span class="qdone ok">✓ richtig</span>' : '<span class="qdone wrong">✗ falsch</span>'; }
 function markCardDone(card,st){ if(!card)return; card.classList.remove('done-ok','done-wrong'); card.classList.add('done', st===1?'done-ok':'done-wrong'); var th=card.querySelector('.thema'); if(!th)return; var old=th.querySelector('.qdone'); if(old)old.remove(); th.insertAdjacentHTML('afterbegin', doneBadge(st)); }
 function markDoneCards(root){ (root||app).querySelectorAll('.card[data-id]').forEach(function(c){ var st=prog[c.dataset.id]; if(st!=null) markCardDone(c,st); }); }
+function fragenSubset(){
+  var t=(LN.q||'').trim().toLowerCase();
+  return Q.filter(function(q){
+    if(LN.mod!=='all'&&q.mod!==LN.mod)return false;
+    if(LN.mw!=='all'&&q.mw!==LN.mw)return false;
+    if(t){var s=((q.q||'')+' '+(q.a||'')+' '+(q.th||'')+' '+q.mod+' '+q.mw+' '+(q.lz||'')).toLowerCase();if(s.indexOf(t)<0)return false;}
+    return true;
+  });
+}
+// Performance: nur den gewählten Scope rendern (nicht alle ~1137 Karten) -> v.a. am Handy flüssig
+function fillFragen(){
+  var fr=document.getElementById('ln-fr'); if(!fr)return;
+  var t=(LN.q||'').trim();
+  if(LN.mod==='all'&&LN.mw==='all'&&!t){
+    fr.innerHTML='<div class="ln-pick">Wähle oben ein <b>Modul</b> (und eine <b>Woche</b>), um die Fragen zu üben — oder nutze die <b>Suche</b> (⌘K).<span class="ln-pick-sub">So lädt es vor allem am Handy deutlich flüssiger.</span></div>';
+    return;
+  }
+  var sub=fragenSubset();
+  if(!sub.length){ fr.innerHTML='<div class="ln-pick">Keine Fragen für diese Auswahl.</div>'; return; }
+  fr.innerHTML=renderGrouped(sub);
+  if(LN.mw==='all')fr.querySelectorAll('.ver-dd').forEach(function(d){d.style.display='none';});
+  markDoneCards(fr);
+}
 function renderLernen(){
   var h='<div class="toolbar">'+chipRow()
    +(LN.q?('<div class="lnrow2"><span class="searchchip">🔎 <b>„'+esc(LN.q)+'"</b><span class="sx" title="Filter entfernen" role="button" aria-label="Suchfilter entfernen">✕</span></span></div>'):'')
    +'<div class="sub lnhint" id="lnhint"></div></div>';
-  h+='<div id="ln-fr">'+renderGrouped(Q)+'</div>';
+  h+='<div id="ln-fr"></div>';
   app.innerHTML=h;
-  app.querySelectorAll('.modbtn').forEach(function(b){b.addEventListener('click',function(){LN.mod=b.dataset.mod;app.querySelectorAll('.modbtn').forEach(function(x){x.classList.toggle('active',x===b);});lnApply();});});
-  app.querySelectorAll('.mwbtn').forEach(function(b){b.addEventListener('click',function(){LN.mw=b.dataset.mw;app.querySelectorAll('.mwbtn').forEach(function(x){x.classList.toggle('active',x===b);});lnApply();});});
+  app.querySelectorAll('.modbtn').forEach(function(b){b.addEventListener('click',function(){LN.mod=b.dataset.mod;app.querySelectorAll('.modbtn').forEach(function(x){x.classList.toggle('active',x===b);});fillFragen();});});
+  app.querySelectorAll('.mwbtn').forEach(function(b){b.addEventListener('click',function(){LN.mw=b.dataset.mw;app.querySelectorAll('.mwbtn').forEach(function(x){x.classList.toggle('active',x===b);});fillFragen();});});
   var _sx=app.querySelector('.searchchip .sx'); if(_sx)_sx.addEventListener('click',function(){ LN.q=''; renderLernen(); });
-  lnApply();
-  markDoneCards(app);
+  fillFragen();
 }
 function lnHeaders(box){ var kids=box.children,i,j;
   for(i=0;i<kids.length;i++){ var el=kids[i]; if(el.className.indexOf('grp-')<0)continue;
