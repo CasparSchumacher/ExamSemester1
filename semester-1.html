@@ -676,7 +676,7 @@ function explHtml(q){ var e=EXP[q.id]; if(!e)return '';
   var h='';
   if(e.kontext)h+='<p class="ex-ktx">'+esc(e.kontext)+'</p>';
   if(e.warum_richtig)h+='<p class="ex-why"><b>Richtig:</b> '+esc(e.warum_richtig)+'</p>';
-  if(e.distraktoren&&e.distraktoren.length){ h+='<div class="ex-distr"><div class="ex-distr-hd">Warum die anderen nicht</div><ul>';
+  if(e.distraktoren&&e.distraktoren.length){ h+='<div class="ex-distr"><ul>';
     e.distraktoren.forEach(function(dx){ h+='<li><b>'+esc(dx.b)+')</b> '+(dx.txt_hint?'<span class="exh">'+esc(dx.txt_hint)+'</span> — ':'')+esc(dx.warum_falsch||'')+'</li>'; });
     h+='</ul></div>'; }
   if(e.hinweis&&(e.flags||[]).indexOf('altklausur_fehler')>=0)h+='<p class="ex-warn"><b>Hinweis (Altklausur):</b> '+esc(e.hinweis)+'</p>';
