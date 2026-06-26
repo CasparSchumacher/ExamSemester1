@@ -679,15 +679,16 @@ function explHtml(q){ var e=EXP[q.id]; if(!e)return '';
   if(e.distraktoren&&e.distraktoren.length){ h+='<div class="ex-distr"><ul>';
     e.distraktoren.forEach(function(dx){ h+='<li><b>'+esc(dx.b)+')</b> '+(dx.txt_hint?'<span class="exh">'+esc(dx.txt_hint)+'</span> — ':'')+esc(dx.warum_falsch||'')+'</li>'; });
     h+='</ul></div>'; }
-  if(e.hinweis&&(e.flags||[]).indexOf('altklausur_fehler')>=0)h+='<p class="ex-warn"><b>Hinweis (Altklausur):</b> '+esc(e.hinweis)+'</p>';
-  else if((e.flags||[]).indexOf('protokoll_shaky')>=0)h+='<p class="ex-note">Protokoll-Frage — Angaben evtl. unvollständig.</p>';
+  var _fl=e.flags||[];
+  if(e.hinweis&&_fl.indexOf('altklausur_fehler')>=0)h+='<p class="ex-warn"><b>Hinweis (Altklausur):</b> '+esc(e.hinweis)+'</p>';
+  else if(e.hinweis&&_fl.indexOf('uebertragungsfehler')>=0)h+='<p class="ex-warn"><b>Hinweis (möglicher Übertragungsfehler):</b> '+esc(e.hinweis)+'</p>';
+  else if(_fl.indexOf('protokoll_shaky')>=0)h+='<p class="ex-note">Protokoll-Frage — Angaben evtl. unvollständig.</p>';
   return h; }
 function cardHtml(q){
   var col=MODCOL[q.mod]||'#666', mk=marks.has(q.id), kwt=KW[q.lz];
   var badges='';
   if(q.nk>=2) badges+='<span class="badge freq'+(q.nk>=4?' hot':'')+' tip" tabindex="0">×'+q.nk+' Klausuren<span class="tipbox">In <b>'+q.nk+' Altklausuren</b> (oder sehr ähnlich) aufgetaucht — ein starker Hinweis auf Prüfungsrelevanz.'+(q.src?'<span class="tsrc">'+esc(q.src)+'</span>':'')+'</span></span>';
   if(q.qt==='prot') badges+='<span class="badge prot tip" tabindex="0">Protokoll<span class="tipbox">Aus einem studentischen <b>Gedächtnisprotokoll</b> — Frage und Antwortoptionen können unvollständig oder ungenau sein.</span></span>';
-  (q.w||[]).forEach(function(w){badges+='<span class="badge wert">'+esc(w)+'</span>';});
   (q.xlz||[]).forEach(function(x){badges+='<span class="badge alsolz tip" tabindex="0">auch '+esc(x)+'<span class="tipbox">'+esc(LZT[x]||'')+'</span></span>';});
   var sstr=esc((q.q+' '+(q.a||'')+' '+q.th+' '+q.mod+' '+q.mw+' '+q.lz).toLowerCase());
   var su=skriptUrl(q.mod,q.mw);
