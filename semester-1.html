@@ -140,6 +140,10 @@ body.dark .badge.freq{background:#3a2f12;color:#e7c66b} body.dark .badge.alsolz{
 .lsjump,.skriptlink{color:#a16207;cursor:pointer;font-size:12.5px;font-weight:600;text-decoration:none} .lsjump:hover,.skriptlink:hover{text-decoration:underline}
 .skriptbtn{display:inline-block;margin:0 0 14px;padding:8px 14px;border:1px solid #2563eb;border-radius:9px;font-size:13px;font-weight:600;text-decoration:none;background:#fff} .skriptbtn:hover{filter:brightness(.97)}
 body.dark .explain{background:#241f12;border-color:#3a3016;border-left-color:#d99a2b}
+.kwbody .ex-ktx{margin:0 0 7px;color:var(--mut)} .kwbody .ex-why{margin:0 0 9px} .kwbody .ex-why b{color:var(--brand,#0f766e)}
+.ex-distr-hd{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--mut);margin-bottom:4px} .ex-distr ul{margin:0;padding:0;list-style:none} .ex-distr li{margin:4px 0;font-size:13px;line-height:1.45} .ex-distr li b{color:var(--mut)} .ex-distr .exh{font-weight:600}
+.ex-warn{margin:9px 0 2px;padding:7px 11px;background:#fff4e0;border:1px solid #f0d9a8;border-radius:8px;font-size:13px;line-height:1.45;color:#8a5a12} body.dark .ex-warn{background:#2c2410;border-color:#4a3a16;color:#e7c66b}
+.ex-note{margin:7px 0 2px;font-size:12px;color:var(--mut);font-style:italic}
 body.dark .explain-hd{background:#2b2412;color:#e7c66b;border-color:#3a3016}
 body.dark .explain-hd .ex-lz,body.dark .lsjump,body.dark .skriptlink{color:#e7c66b}
 body.dark .skriptbtn{background:#171c22}
@@ -625,7 +629,7 @@ body.gamify .kspill:hover{ transform:translateY(-1px); box-shadow:var(--sh-1) }
 <script src="data/semester-1.js"></script>
 <script>
 (function(){
-var S=window.S1, Q=S.questions, LZ=S.lernziele, KW=S.kw||{}, MWI=S.mwIntro||{}, SKP=S.skriptPg||{}, NAME="Casomorphin", W3F="bc25006f-8fbf-47ec-9df9-4aa6a82634be", DONATE="https://ko-fi.com/O4G121U4EG";
+var S=window.S1, Q=S.questions, LZ=S.lernziele, KW=S.kw||{}, EXP=S.expl||{}, MWI=S.mwIntro||{}, SKP=S.skriptPg||{}, NAME="Casomorphin", W3F="bc25006f-8fbf-47ec-9df9-4aa6a82634be", DONATE="https://ko-fi.com/O4G121U4EG";
 function skriptUrl(mod,mw){ var p=SKP[mod+'|'+mw]; if(!p)return null; return {url:'skript/skript-'+mod.toLowerCase()+'.pdf#page='+p, page:p}; }
 var MODNAME=S.meta.modnames, MODCOL={M02:"#4338ca",M03:"#047857",M04:"#7c3aed"};
 var MODS=["M02","M03","M04"];
@@ -668,6 +672,16 @@ function kwHtml(t){ var lines=(t||'').split('\n'),out='',inul=false;
 function figHtml(q){ if(!q.b) return ''; if(q.bok) return '<div class="abb"><img loading="lazy" src="img/'+esc(q.b)+'.jpg" alt="Abbildung '+esc(q.b)+'"><div class="abbcap">Abbildung '+esc(q.b)+' – zum Vergrößern klicken</div></div>'; return '<div class="abbmiss">⚠ Abbildung '+esc(q.b)+' – Bildbeilage im Original nicht verfügbar</div>'; }
 function optsHtml(q){ if(q.o&&q.o.length){ var sh=(typeof gamifyOn==='function'&&gamifyOn()); var opts=sh?shuffle(q.o):q.o;
     return opts.map(function(o,i){var c=o[2]; var lab=sh?String.fromCharCode(97+i):o[0]; return '<li class="opt'+(c?' correct':'')+'"'+(c?' data-correct="1"':'')+'><span class="chk">'+(c?'✓':'')+'</span><span class="ol">'+esc(lab)+')</span> '+esc(o[1])+'</li>';}).join(''); } return '<li class="opt correct" data-correct="1"><span class="chk">✓</span> '+esc(q.a)+'</li>'; }
+function explHtml(q){ var e=EXP[q.id]; if(!e)return '';
+  var h='';
+  if(e.kontext)h+='<p class="ex-ktx">'+esc(e.kontext)+'</p>';
+  if(e.warum_richtig)h+='<p class="ex-why"><b>Richtig:</b> '+esc(e.warum_richtig)+'</p>';
+  if(e.distraktoren&&e.distraktoren.length){ h+='<div class="ex-distr"><div class="ex-distr-hd">Warum die anderen nicht</div><ul>';
+    e.distraktoren.forEach(function(dx){ h+='<li><b>'+esc(dx.b)+')</b> '+(dx.txt_hint?'<span class="exh">'+esc(dx.txt_hint)+'</span> — ':'')+esc(dx.warum_falsch||'')+'</li>'; });
+    h+='</ul></div>'; }
+  if(e.hinweis&&(e.flags||[]).indexOf('altklausur_fehler')>=0)h+='<p class="ex-warn"><b>Hinweis (Altklausur):</b> '+esc(e.hinweis)+'</p>';
+  else if((e.flags||[]).indexOf('protokoll_shaky')>=0)h+='<p class="ex-note">Protokoll-Frage — Angaben evtl. unvollständig.</p>';
+  return h; }
 function cardHtml(q){
   var col=MODCOL[q.mod]||'#666', mk=marks.has(q.id), kwt=KW[q.lz];
   var badges='';
@@ -677,8 +691,9 @@ function cardHtml(q){
   (q.xlz||[]).forEach(function(x){badges+='<span class="badge alsolz tip" tabindex="0">auch '+esc(x)+'<span class="tipbox">'+esc(LZT[x]||'')+'</span></span>';});
   var sstr=esc((q.q+' '+(q.a||'')+' '+q.th+' '+q.mod+' '+q.mw+' '+q.lz).toLowerCase());
   var su=skriptUrl(q.mod,q.mw);
-  var explain = kwt ? ('<div class="explain"><div class="explain-hd"><span class="ex-dot"></span>Erklärung<span class="ex-lz">· Lernziel '+esc(q.lz)+'</span><span class="betabadge" style="margin-left:auto">Beta</span></div>'
-     +'<div class="kwbody">'+kwHtml(kwt)+'</div>'
+  var exbody = EXP[q.id] ? explHtml(q) : (kwt ? kwHtml(kwt) : '');
+  var explain = exbody ? ('<div class="explain"><div class="explain-hd"><span class="ex-dot"></span>Erklärung<span class="ex-lz">· Lernziel '+esc(q.lz)+'</span><span class="betabadge" style="margin-left:auto">Beta</span></div>'
+     +'<div class="kwbody">'+exbody+'</div>'
      +'<div class="explain-links"><span class="lsjump" data-mod="'+q.mod+'" data-mw="'+q.mw+'">→ Modulwoche im Lernskript</span>'
      +(su?'<a class="skriptlink" href="'+su.url+'" target="_blank" rel="noopener">→ im Modulskript (S. '+su.page+') ↗</a>':'')
      +'</div></div>') : '';
